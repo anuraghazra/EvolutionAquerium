@@ -1,7 +1,8 @@
-function Agent(x, y, radius) {
+const mutationRate = 0.8;
+function Agent(x, y, radius, dna) {
   this.pos = new Vector(x, y);
   this.acc = new Vector(0, 0);
-  this.vel = new Vector(0, -2);
+  this.vel = new Vector(0, -1);
 
   this.canvasWidth = 1280;
   this.canvasHeight = 600;
@@ -12,16 +13,42 @@ function Agent(x, y, radius) {
   this.maxForce = 0.05;
 
   this.health = 1;
-  this.healthDie = 0.005; 
-  this.goodFoodDie = 2;
-  this.badFoodDie = -0.3;
+  this.healthDecrease = 0.005; 
+  this.goodFoodDie = 0.5;
+  this.badFoodDie = -0.8;
   
   this.sex = (Math.random() < 0.5) ? 'male' : 'female';
   this.maxRadius = (this.sex === 'male') ? 15 : 10;
 
-  this.dna = [1,-1];
-  this.dna[0] = 2-Math.random()*2;
-  this.dna[1] = 2-Math.random()*2;
+  this.dna = [];
+  if(dna == undefined) {
+    // food wheight
+    this.dna[0] = random(2,-2);
+    // poison wheight
+    this.dna[1] = random(2,-2);
+    // food perception
+    this.dna[2] = random(0,100);
+    // posion perception
+    this.dna[3] = random(0,100);
+  } else {
+    this.dna[0] = dna[0];
+    if(Math.random() < mutationRate) {
+      this.dna[0] += random(-0.85,0.85);
+    }
+    this.dna[1] = dna[1];
+    if(Math.random() < mutationRate) {
+      this.dna[1] += random(-0.85,0.85);
+    }
+    this.dna[2] = dna[2];
+    if(Math.random() < mutationRate) {
+      this.dna[2] += random(-9.5,9.5);
+    }
+    this.dna[3] = dna[3];
+    if(Math.random() < mutationRate) {
+      this.dna[3] += random(-9.5,9.5);
+    }
+  }
+  this.maxSpeed = this.dna[1];
 
   // Update Position
   this.update = function() {
@@ -32,21 +59,7 @@ function Agent(x, y, radius) {
 
     this.acc.mult(0);
 
-    this.health -= this.healthDie;
-
-    // Collision
-    if(this.pos.x < 0) {
-      this.pos.x = this.canvasWidth;
-    }
-    if(this.pos.x > this.canvasWidth) {
-      this.pos.x = 0;
-    }
-    if(this.pos.y < 0) {
-      this.pos.y = this.canvasHeight;
-    }
-    if(this.pos.y > this.canvasHeight) {
-      this.pos.y = 0;
-    }
+    this.health -= this.healthDecrease;
   }
 
   this.applyForce = function(f) {
@@ -57,6 +70,50 @@ function Agent(x, y, radius) {
     return (this.health < 0);
   }
 
+  this.boundaries = function() {
+    let d = 50;
+    let desire = null;
+
+    if(this.pos.x < d) {
+      desire = new Vector(this.maxSpeed, this.vel.y);
+    } else if (this.pos.x > width - d) {
+      desire = new Vector(-this.maxSpeed, this.vel.y);
+    }
+
+    if(this.pos.y < d) {
+      desire = new Vector(this.vel.x, this.maxSpeed);
+    } else if (this.pos.y > height - d) {
+      desire = new Vector(this.vel.x, -this.maxSpeed);
+    }
+
+    if(desire !== null) {
+      desire.normalize();
+      desire.mult(this.maxSpeed);
+      let steer =  desire.subBy(this.vel);
+      steer.limit(this.maxForce);
+      this.applyForce(steer);
+    }
+  }
+
+
+
+  this.attact = function(wit, weight, perception) {
+    let record = Infinity;
+    let close = null;
+
+    for (let i = wit.length-1; i >= 0 ; i--) {
+      let d = dist(this.pos.x, this.pos.y, wit[i].pos.x, wit[i].pos.y);
+      if(d < perception) {
+        record = d;
+        close = wit[i];
+      }
+    }
+    
+    // seek
+    if(close !== null) {
+      this.applyForce(this.seek(close).mult(weight));
+    }
+  }
 
   /**
    * behaviours
@@ -65,8 +122,9 @@ function Agent(x, y, radius) {
    */
   this.behaviour = function(good, bad, weights) {
 
-    let goodFood = this.eat(good, this.goodFoodDie);
-    let badFood = this.eat(bad, this.badFoodDie);
+    let goodFood = this.eat(good, this.goodFoodDie, this.dna[2]);
+    let badFood = this.eat(bad, this.badFoodDie, this.dna[3]);
+    
 
     if(!weights) {
       goodFood.mult(this.dna[0]);
@@ -78,6 +136,7 @@ function Agent(x, y, radius) {
 
     this.applyForce(goodFood);
     this.applyForce(badFood);
+    
   }
 
   // SEEK Algorithm
@@ -92,44 +151,46 @@ function Agent(x, y, radius) {
     return steer;
   }
 
-
-  function dist(px, py, qx, qy) {
-    let dx = px-qx;
-    let dy = py-qy;
-    return Math.sqrt(dx*dx+dy*dy);
-  }
-
   /**
    * Eat Food
    * @param {} list 
    */
-  this.eat = function(list, nutri) {
+  this.eat = function(list, nutri, perception) {
     let record = Infinity;
-    let close = -1;
+    let close = null;
 
-    for (let i = 0; i < list.length; i++) {
+    for (let i = list.length-1; i >= 0 ; i--) {
       let d = dist(this.pos.x, this.pos.y, list[i].pos.x, list[i].pos.y);
-      if(d < record) {
-        record = d;
-        close = i;
+
+      // delete 
+      if(d < (5+this.radius)) {
+        list.splice(i, 1);
+        this.health += nutri;
+        this.radius += nutri;
+        clamp(0,this.maxRadius,this.radius);
+        clamp(0,1,this.health);
+
+      } else {
+        if(d < record && d < perception) {
+          record = d;
+          close = list[i];
+        }
       }
     }
     
-    // delete and seek
-    if(record < 5) {
-      list.splice(close, 1);
-      this.health += nutri;
-      this.radius += nutri;
-      if(this.health > 1) {
-        this.health = 1;
-      }
-      if(this.radius > this.maxRadius) {
-        this.radius = this.maxRadius;
-      }
-    } else if(close > -1) {
-      return this.seek(list[close]);
+    // seek
+    if(close !== null) {
+      return this.seek(close);
     }
+
     return new Vector(0,0);
+  }
+
+  this.clone = function() {
+    if(Math.random() < 0.002) {
+      return new Agent(this.pos.x, this.pos.y, 5, this.dna)
+    }
+    return null;
   }
 
   /**
@@ -146,20 +207,17 @@ function Agent(x, y, radius) {
         // get the distance
         let d = dist(agentA.pos.x, agentA.pos.y, agentB.pos.x, agentB.pos.y);
         
-        if (d < agentB.radius+agentA.radius) {
-          if ( (agentB.sex === 'male' && agentA.sex === 'female') 
-            || (agentA.sex === 'male' && agentB.sex === 'female') ) {
+        if (d < (agentB.radius+agentA.radius)) {
+          if ( ((agentB.sex === 'male' && agentA.sex === 'female') 
+            || (agentA.sex === 'male' && agentB.sex === 'female') ) && (agentA.radius > 8 && agentB.radius > 8) ) {
 
-            let x = agentA.pos.x;
-            let y = agentA.pos.y;
-            list.push(new Agent(x, y, 4)
-                      );
-            if (callback) {
-              callback();
+            let x = agentA.pos.x+agentB.pos.heading();
+            let y = agentA.pos.y+agentB.pos.heading();
+            if(Math.random() < 0.003) {
+              list.push(new Agent(x, y, 5, this.dna));
             }
-            continue;
+            return;
           }
-          return;
         }
       }
     }
@@ -193,6 +251,21 @@ function Agent(x, y, radius) {
     ctx.lineTo(this.radius,0);
     
     ctx.fill();
+    
+    // DEBUG
+    
+    ctx.beginPath();
+    ctx.strokeStyle = 'green';
+    ctx.arc(0,0,clamp(0,100,this.dna[2]), 0, Math.PI*2);
+    ctx.stroke();
+    ctx.closePath();
+
+    ctx.beginPath();
+    ctx.strokeStyle = 'red';
+    ctx.arc(0,0,clamp(0,100,this.dna[3]), 0, Math.PI*2);
+    ctx.stroke();
+    ctx.closePath();
+    
     ctx.closePath();
     ctx.restore();
   }
