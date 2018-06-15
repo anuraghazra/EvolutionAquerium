@@ -2,7 +2,7 @@ const mutationRate = 0.8;
 function Agent(x, y, radius, dna) {
   this.pos = new Vector(x, y);
   this.acc = new Vector(0, 0);
-  this.vel = new Vector(0, -1);
+  this.vel = new Vector(0, -2);
 
   this.canvasWidth = 1280;
   this.canvasHeight = 600;
@@ -48,7 +48,6 @@ function Agent(x, y, radius, dna) {
       this.dna[3] += random(-9.5,9.5);
     }
   }
-  this.maxSpeed = this.dna[1];
 
   // Update Position
   this.update = function() {
@@ -167,7 +166,9 @@ function Agent(x, y, radius, dna) {
         list.splice(i, 1);
         this.health += nutri;
         this.radius += nutri;
-        clamp(0,this.maxRadius,this.radius);
+        if(this.radius > this.maxRadius) {
+          this.radius = this.maxRadius
+        }
         clamp(0,1,this.health);
 
       } else {
@@ -209,11 +210,11 @@ function Agent(x, y, radius, dna) {
         
         if (d < (agentB.radius+agentA.radius)) {
           if ( ((agentB.sex === 'male' && agentA.sex === 'female') 
-            || (agentA.sex === 'male' && agentB.sex === 'female') ) && (agentA.radius > 8 && agentB.radius > 8) ) {
+            || (agentA.sex === 'male' && agentB.sex === 'female') )) {
 
-            let x = agentA.pos.x+agentB.pos.heading();
-            let y = agentA.pos.y+agentB.pos.heading();
-            if(Math.random() < 0.003) {
+            if(Math.random() < 0.001) {
+              let x = Math.cos(agentB.vel.heading()) +this.pos.x;
+              let y = Math.sin(agentB.vel.heading()) +this.pos.y;
               list.push(new Agent(x, y, 5, this.dna));
             }
             return;
@@ -254,17 +255,17 @@ function Agent(x, y, radius, dna) {
     
     // DEBUG
     
-    ctx.beginPath();
-    ctx.strokeStyle = 'green';
-    ctx.arc(0,0,clamp(0,100,this.dna[2]), 0, Math.PI*2);
-    ctx.stroke();
-    ctx.closePath();
+    // ctx.beginPath();
+    // ctx.strokeStyle = 'green';
+    // ctx.arc(0,0,clamp(0,100,this.dna[2]), 0, Math.PI*2);
+    // ctx.stroke();
+    // ctx.closePath();
 
-    ctx.beginPath();
-    ctx.strokeStyle = 'red';
-    ctx.arc(0,0,clamp(0,100,this.dna[3]), 0, Math.PI*2);
-    ctx.stroke();
-    ctx.closePath();
+    // ctx.beginPath();
+    // ctx.strokeStyle = 'red';
+    // ctx.arc(0,0,clamp(0,100,this.dna[3]), 0, Math.PI*2);
+    // ctx.stroke();
+    // ctx.closePath();
     
     ctx.closePath();
     ctx.restore();

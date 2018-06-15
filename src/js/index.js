@@ -9,15 +9,17 @@ let ctx = canvas.getContext('2d');
 
 window.onload = function () {
 
+  let predators = [];
   let creatures = [];
   let food = [];
   let poison = [];
 
   // ================================ ADD ITEMS
   function setup() {
-    addItem(food, 100);
-    addItem(poison, 20);
-    addCreatures(creatures, 20);
+    addItem(food, 120);
+    addItem(poison, 50);
+    addCreatures(creatures, 100);
+    addPredators(predators, 5);
   }
   setup();
 
@@ -36,25 +38,35 @@ window.onload = function () {
       creatures[i].boundaries();
       creatures[i].update();
       creatures[i].render(ctx);
-      // if(Math.random() < 0.5) {
-        if(creatures[i].sex === 'male') {
-          creatures[i].attact(creatures,0.2, 100)
-        }
-      // }
+      creatures[i].attact(predators,-1, 100)
       
-      // let newAgent = creatures[i].clone();
-      // if(newAgent !== null) {
-      //   creatures.push(newAgent);
-      // }
-      if(Math.random() < 0.5) {
-        creatures[i].reproduce(creatures);
+      let newAgent = creatures[i].clone();
+      if(newAgent !== null) {
+        creatures.push(newAgent);
       }
-
+      creatures[i].reproduce(creatures);
+        
+        
       if(creatures[i].dead()) {
         let x = creatures[i].pos.x;
         let y = creatures[i].pos.y;
         food.push({ pos: new Vector(x, y) });
         creatures.splice(i,1);
+      }
+    }
+
+    // predators
+    for (let i = predators.length-1; i >= 0; i--) {
+      predators[i].behaviour(creatures, food, [1,-0.5]);
+      predators[i].boundaries();
+      predators[i].update();
+      predators[i].render(ctx);    
+      
+      if(predators[i].dead()) {
+        let x = predators[i].pos.x;
+        let y = predators[i].pos.y;
+        food.push({ pos: new Vector(x, y) });
+        predators.splice(i,1);
       }
 
     }

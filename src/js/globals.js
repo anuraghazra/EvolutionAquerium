@@ -6,6 +6,14 @@ function addCreatures(list, max) {
     list.push(new Agent(x, y, radius));
   }
 }
+function addPredators(list, max) {
+  for (let i = 0; i < max; i++) {
+    let x = Math.random() * width;
+    let y = Math.random() * height;
+    let radius = 6 + Math.random() * 10;
+    list.push(new Predator(x, y, radius));
+  }
+}
 function addItem(list, max) {
   for (let i = 0; i < max; i++) {
     let x = Math.random() * width;
