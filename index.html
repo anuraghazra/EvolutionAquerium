@@ -3,23 +3,67 @@
 <head>
   <title>Evolution Aquerium</title>
   <style>
+    * {
+      font-family: 'Century Gothic';
+      user-select: none;
+    }
     body {
       margin: 0;
-      /* color: orange */
+      /* color: rgb(255, 165, 0) */
     }
     canvas {
       margin: 0;
+    }
+    .controls {
+      padding: 10px;
+    }
+    .controls label {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 10px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.4)
+    }
+    select {
+      padding: 5px;
+      border-radius: 5px;    
+      outline: none;  
+      border: 1px solid rgba(0,0,0,0.4);
     }
   </style>
 </head>
 <body>
   <canvas id="c"></canvas>
 
+  <div class="controls">
+
+    <label>
+      Debug Mode
+      <input type="checkbox" id="debug">
+    </label>
+    <label>
+      Show Names
+      <input type="checkbox" id="names">
+    </label>
+
+    <label>
+      Add New
+      <select id="addnew">
+        <option value="agent">Agent</option>
+        <option value="predator">Pradator</option>
+        <option value="avoider">Avoider</option>
+        <option value="food">Food</option>
+        <option value="poison">Poison</option>
+      </select>
+    </label>
+
+  </div>
+
   <!-- <script src="./src/js/p5min.js"></script> -->
   <script src="./src/js/p5Vector.js"></script>
   <script src="./src/js/agent.js"></script>
-  <script src="./src/js/predator.js"></script>
+  <script src="./src/js/otherAgents.js"></script>
   <script src="./src/js/globals.js"></script>
   <script src="./src/js/index.js"></script>
+
 </body>
 </html>

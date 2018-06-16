@@ -15,66 +15,75 @@ function Predator(x, y, radius, dna) {
   this.acc = new Vector(0, 0);
   this.vel = new Vector(0, -2);
 
-  this.canvasWidth = 1280;
-  this.canvasHeight = 600;
-
   this.radius = radius;
 
-  this.maxSpeed = 1;
+  this.maxSpeed = 3;
   this.maxForce = 0.1;
 
   this.health = 1;
-  this.healthDecrease = 0.001; 
-  this.goodFoodDie = 2;
-  this.badFoodDie = 0;
+  this.healthDecrease = 0.002; 
+  this.goodFoodDie = 0.5;
+  this.badFoodDie = -0.5;
   this.sex = 'pradator';
   this.maxRadius = 20;
 
-  this.dna = [1,1,100,100];
-  // // food wheight
-  // this.dna[0] = random(2,-2);
-  // // poison wheight
-  // this.dna[1] = random(2,-2);
-  // // food perception
-  // this.dna[2] = random(0,100);
-  // // posion perception
-  // this.dna[3] = random(0,100);
+  this.dna = [];
+  // food wheight
+  this.dna[0] = random(0.5,1);
+  // poison wheight
+  this.dna[1] = random(-0.2,-0.8);
+  // food perception
+  this.dna[2] = random(0,100);
+  // posion perception
+  this.dna[3] = random(0,100);
 
   this.color = 'red';
 
   this.predatorUpdate = function() {
     this.maxSpeed = this.radius/2;
   }
+  
 }
 
 function Avoider(x, y, radius) {
   Avoider._super.apply(this,[x,y,radius])
   this.pos = new Vector(x, y);
   this.acc = new Vector(0, 0);
-  this.vel = new Vector(0, 0);
-
-  this.canvasWidth = 1280;
-  this.canvasHeight = 600;
+  this.vel = new Vector(0, 2);
 
   this.radius = radius;
 
-  this.maxSpeed = 3;
-  this.maxForce = 0.2;
+  this.maxSpeed = 5;
+  this.maxForce = 0.4;
 
   this.health = 1;
-  this.healthDie = 0.001;
+  this.healthDecrease = 0.002;
   this.sex = 'avoider';
   this.maxRadius = 10;
 
   this.goodFoodDie = 0.5;
-  this.badFoodDie = -0.9;
+  this.badFoodDie = -0.5;
 
-  this.dna = [-1,-1];
-  // this.dna[0] = 2-Math.random()*2;
-  // this.dna[1] = 2-Math.random()*2;
+  this.dna = [];
+  // food wheight
+  this.dna[0] = random(0.8,-1);
+  // poison wheight
+  this.dna[1] = random(-0.8,1);
+  // food perception
+  this.dna[2] = random(0,100);
+  // posion perception
+  this.dna[3] = random(0,100);
+
+  console.log('food :' + this.dna[0] + '| poison : ' + this.dna[1])
 
   this.color = 'orange';
 
+  this.birthNew = function() {
+    if(Math.random() < 0.05) {
+      return new Agent(this.pos.x, this.pos.y, 5, this.dna)
+    }
+    return null;
+  }
 }
 
 inherits(Agent, Predator);

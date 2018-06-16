@@ -1,5 +1,5 @@
 // Global
-let width = 1280;
+let width = window.innerWidth;
 let height = 600;
 let canvas = document.querySelector('#c');
 canvas.width = width;
@@ -11,20 +11,45 @@ window.onload = function () {
 
   let predators = [];
   let creatures = [];
+  let avoiders = [];
   let food = [];
   let poison = [];
 
   // ================================ ADD ITEMS
   function setup() {
-    addItem(food, 120);
-    addItem(poison, 50);
-    addCreatures(creatures, 100);
-    addPredators(predators, 5);
+    addItem(food, random(50,150));
+    addItem(poison, random(10,50));
+    addCreatures(creatures, random(10,15));
+    addPredators(predators, random(2,8));
+    addAvoiders(avoiders, random(1,8));
+    // addItem(food, 10);
+    // addItem(poison, 10);
+    // addCreatures(creatures, 5);
+    // addPredators(predators, 1);
+    // addAvoiders(avoiders, random(1,8));
   }
   setup();
 
+  // UI add
+  let add = document.getElementById('addnew');
   canvas.addEventListener('click', function(e) {
-    creatures.push(new Agent(e.offsetX, e.offsetY,10))
+    switch(add.value) {
+      case 'agent' : 
+        creatures.push(new Agent(e.offsetX, e.offsetY,10))
+        break;
+      case 'predator' : 
+        predators.push(new Predator(e.offsetX, e.offsetY,10))
+        break;
+      case 'avoider' : 
+        avoiders.push(new Avoider(e.offsetX, e.offsetY,10))
+        break;
+      case 'food' : 
+        food.push({pos : new Vector(e.offsetX, e.offsetY)})
+        break;
+      case 'Poison' : 
+        poison.push({pos : new Vector(e.offsetX, e.offsetY)})
+        break;
+    }
   })
 
 
@@ -33,43 +58,36 @@ window.onload = function () {
     ctx.fillRect(0, 0, width, height);
 
     // agent
-    for (let i = creatures.length-1; i >= 0; i--) {
-      creatures[i].behaviour(food, poison);
-      creatures[i].boundaries();
-      creatures[i].update();
-      creatures[i].render(ctx);
-      creatures[i].attact(predators,-1, 100)
-      
-      let newAgent = creatures[i].clone();
-      if(newAgent !== null) {
-        creatures.push(newAgent);
+    batchUpdateAgents(creatures, food, poison, function(list, i) {
+      let me = list[i];
+      let child = list[i].clone(0.001);
+      if(child !== null) {
+        list.push(child);
       }
-      creatures[i].reproduce(creatures);
-        
-        
-      if(creatures[i].dead()) {
-        let x = creatures[i].pos.x;
-        let y = creatures[i].pos.y;
-        food.push({ pos: new Vector(x, y) });
-        creatures.splice(i,1);
-      }
+      me.defineFear(predators, -100, 200)
+    });
+    
+    if(creatures.length > 0 && Math.random() < 0.3) {
+      creatures[0].reproduce(creatures);  
     }
 
     // predators
-    for (let i = predators.length-1; i >= 0; i--) {
-      predators[i].behaviour(creatures, food, [1,-0.5]);
-      predators[i].boundaries();
-      predators[i].update();
-      predators[i].render(ctx);    
-      
-      if(predators[i].dead()) {
-        let x = predators[i].pos.x;
-        let y = predators[i].pos.y;
-        food.push({ pos: new Vector(x, y) });
-        predators.splice(i,1);
-      }
-
-    }
+    batchUpdateAgents(predators, poison, food, function(list, i) {
+      let me = list[i];
+      me.defineFear(creatures, 1, 100, function(list, i) {
+        list.splice(i,1);
+        me.health += me.goodFoodDie;
+        me.radius += me.goodFoodDie;
+      })
+    });
+    
+    // avoiders
+    batchUpdateAgents(avoiders, food, poison, function(list, i) {
+      let me = list[i];
+      me.defineFear(predators, -1, me.dna[2], function(list, i) {
+        me.health += me.badFoodDie;
+      })
+    });
 
     if(Math.random() < 0.03) {
       addItem(food, 1);
@@ -80,7 +98,7 @@ window.onload = function () {
     
 
     // render items
-    renderItem(food,'lightgreen',3);
+    renderItem(food,'white',1);
     renderItem(poison,'crimson',2);
 
     requestAnimationFrame(animate)

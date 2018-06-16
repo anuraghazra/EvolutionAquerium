@@ -1,15 +1,15 @@
-const mutationRate = 0.8;
+const mutationRate = 0.5;
 function Agent(x, y, radius, dna) {
   this.pos = new Vector(x, y);
   this.acc = new Vector(0, 0);
   this.vel = new Vector(0, -2);
 
-  this.canvasWidth = 1280;
-  this.canvasHeight = 600;
+  this.canvasWidth = width;
+  this.canvasHeight = height;
 
   this.radius = radius;
 
-  this.maxSpeed = 2;
+  this.maxSpeed = 1.5;
   this.maxForce = 0.05;
 
   this.health = 1;
@@ -23,9 +23,9 @@ function Agent(x, y, radius, dna) {
   this.dna = [];
   if(dna == undefined) {
     // food wheight
-    this.dna[0] = random(2,-2);
+    this.dna[0] = random(1,-1);
     // poison wheight
-    this.dna[1] = random(2,-2);
+    this.dna[1] = random(-1,1);
     // food perception
     this.dna[2] = random(0,100);
     // posion perception
@@ -33,20 +33,32 @@ function Agent(x, y, radius, dna) {
   } else {
     this.dna[0] = dna[0];
     if(Math.random() < mutationRate) {
-      this.dna[0] += random(-0.85,0.85);
+      this.dna[0] += random(0.5,-0.5);
     }
     this.dna[1] = dna[1];
     if(Math.random() < mutationRate) {
-      this.dna[1] += random(-0.85,0.85);
+      this.dna[1] += random(-0.5,0.1);
     }
     this.dna[2] = dna[2];
     if(Math.random() < mutationRate) {
-      this.dna[2] += random(-9.5,9.5);
+      this.dna[2] += random(-10,20);
     }
     this.dna[3] = dna[3];
     if(Math.random() < mutationRate) {
-      this.dna[3] += random(-9.5,9.5);
+      this.dna[3] += random(-10,20);
     }
+  }
+  // if(this.sex === 'male' || this.sex === 'female') {
+  //   console.log('food :' + this.dna[0] + '| poison : ' + this.dna[1])
+  // }
+
+  let names_female = ['hanna','mona','kim','sweet','sofia','rose','laisy','daisy','mia']
+  let names_male = ['joe','jim','kim','keo','shaun','morgan','jery','tom','anu','brian','ninja']
+  
+  if(this.sex === 'female') {
+    this.name = names_female[Math.floor(random(0,names_female.length-1))]
+  } else if (this.sex === 'male') {
+    this.name = names_male[Math.floor(random(0,names_male.length-1))]
   }
 
   // Update Position
@@ -89,27 +101,38 @@ function Agent(x, y, radius, dna) {
       desire.normalize();
       desire.mult(this.maxSpeed);
       let steer =  desire.subBy(this.vel);
-      steer.limit(this.maxForce);
+      steer.limit(0.1);
       this.applyForce(steer);
     }
   }
 
 
-
-  this.attact = function(wit, weight, perception) {
+  /**
+   * Defines seek behaviour
+   * @param {array} wit 
+   * @param {float} weight 
+   * @param {int} perception 
+   * @param {func} callback 
+   */
+  this.defineFear = function (wit, weight, perception, callback) {
     let record = Infinity;
     let close = null;
 
-    for (let i = wit.length-1; i >= 0 ; i--) {
+    for (let i = wit.length - 1; i >= 0; i--) {
       let d = dist(this.pos.x, this.pos.y, wit[i].pos.x, wit[i].pos.y);
-      if(d < perception) {
-        record = d;
-        close = wit[i];
+      if (d < this.radius) {
+        if (callback) {
+          callback.call(null, wit, i);
+        }
+      } else {
+        if (d < record && d < perception) {
+          record = d;
+          close = wit[i];
+        }
       }
     }
-    
     // seek
-    if(close !== null) {
+    if (close !== null) {
       this.applyForce(this.seek(close).mult(weight));
     }
   }
@@ -166,11 +189,8 @@ function Agent(x, y, radius, dna) {
         list.splice(i, 1);
         this.health += nutri;
         this.radius += nutri;
-        if(this.radius > this.maxRadius) {
-          this.radius = this.maxRadius
-        }
-        clamp(0,1,this.health);
-
+        if(this.radius > this.maxRadius) { this.radius = this.maxRadius }
+        if(this.health > 1) { this.health = 1; }
       } else {
         if(d < record && d < perception) {
           record = d;
@@ -187,8 +207,8 @@ function Agent(x, y, radius, dna) {
     return new Vector(0,0);
   }
 
-  this.clone = function() {
-    if(Math.random() < 0.002) {
+  this.clone = function(probability) {
+    if(Math.random() < probability) {
       return new Agent(this.pos.x, this.pos.y, 5, this.dna)
     }
     return null;
@@ -209,14 +229,13 @@ function Agent(x, y, radius, dna) {
         let d = dist(agentA.pos.x, agentA.pos.y, agentB.pos.x, agentB.pos.y);
         
         if (d < (agentB.radius+agentA.radius)) {
-          if ( ((agentB.sex === 'male' && agentA.sex === 'female') 
-            || (agentA.sex === 'male' && agentB.sex === 'female') )) {
+          if ( ((agentB.sex === 'male' || agentA.sex === 'female') 
+            || (agentA.sex === 'male' || agentB.sex === 'female')) 
+            && (agentA.radius > 8 || agentB.radius > 8)) {
 
-            if(Math.random() < 0.001) {
-              let x = Math.cos(agentB.vel.heading()) +this.pos.x;
-              let y = Math.sin(agentB.vel.heading()) +this.pos.y;
-              list.push(new Agent(x, y, 5, this.dna));
-            }
+            let x = agentB.pos.x + random(agentB.vel.x,agentA.vel.x);
+            let y = agentB.pos.y + random(agentB.vel.y,agentA.vel.y);
+            list.push(new Agent(x, y, 5, this.dna))
             return;
           }
         }
@@ -230,6 +249,12 @@ function Agent(x, y, radius, dna) {
    */
   this.render = function(ctx) {
     ctx.beginPath();
+    
+    if(document.getElementById('names').checked) {
+      ctx.fillStyle = 'white';
+      ctx.fillText(this.name, this.pos.x-this.radius,this.pos.y-this.radius-5);
+      ctx.fill();
+    }
 
     if(this.sex === 'male') {
       ctx.fillStyle = 'rgba(0,170,0,'+this.health+')';
@@ -237,8 +262,8 @@ function Agent(x, y, radius, dna) {
       ctx.fillStyle = 'rgba(255,39,201,'+this.health+')';
     } else if(this.sex === 'pradator') {
       ctx.fillStyle = 'rgba(255,0,0,'+this.health+')';
-    } else {
-      ctx.fillStyle = this.color;
+    } else if (this.sex === 'avoider') {
+      ctx.fillStyle = 'rgba(255, 165, 0, '+this.health+')'
     }
 
     let angle = this.vel.heading() + Math.PI/180;
@@ -250,24 +275,29 @@ function Agent(x, y, radius, dna) {
     ctx.lineTo(-this.radius,-this.radius+2);
     ctx.lineTo(-this.radius,this.radius-4);
     ctx.lineTo(this.radius,0);
-    
     ctx.fill();
+
+    
+    
     
     // DEBUG
     
-    // ctx.beginPath();
-    // ctx.strokeStyle = 'green';
-    // ctx.arc(0,0,clamp(0,100,this.dna[2]), 0, Math.PI*2);
-    // ctx.stroke();
-    // ctx.closePath();
-
-    // ctx.beginPath();
-    // ctx.strokeStyle = 'red';
-    // ctx.arc(0,0,clamp(0,100,this.dna[3]), 0, Math.PI*2);
-    // ctx.stroke();
-    // ctx.closePath();
+    if(document.getElementById('debug').checked) {
+      ctx.beginPath();
+      ctx.strokeStyle = 'green';
+      ctx.arc(0,0,clamp(0,100,this.dna[2]), 0, Math.PI*2);
+      ctx.stroke();
+      ctx.closePath();
+  
+      ctx.beginPath();
+      ctx.strokeStyle = 'red';
+      ctx.arc(0,0,clamp(0,100,this.dna[3]), 0, Math.PI*2);
+      ctx.stroke();
+      ctx.closePath();
+    }
     
     ctx.closePath();
     ctx.restore();
+    
   }
 }

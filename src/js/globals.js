@@ -14,10 +14,22 @@ function addPredators(list, max) {
     list.push(new Predator(x, y, radius));
   }
 }
-function addItem(list, max) {
+function addAvoiders(list, max) {
   for (let i = 0; i < max; i++) {
     let x = Math.random() * width;
     let y = Math.random() * height;
+    let radius = 3 + Math.random() * 8;
+    list.push(new Avoider(x, y, radius));
+  }
+}
+function addItem(list, max, xx, yy) {
+  for (let i = 0; i < max; i++) {
+    let x = xx;
+    let y = yy;
+    if (x == undefined && y == undefined) {
+      x = Math.random() * width;
+      y = Math.random() * height;
+    }
     list.push({ pos: new Vector(x, y) });
   }
 }
@@ -28,6 +40,26 @@ function renderItem(list, color, radius) {
     ctx.arc(list[i].pos.x, list[i].pos.y, (radius || 5), 0, Math.PI * 2);
     ctx.fill();
     ctx.closePath();
+  }
+}
+
+function batchUpdateAgents(list, like, dislike, callback) {
+  for (let i = list.length-1; i >= 0; i--) {  
+    list[i].behaviour(like, dislike);
+    list[i].boundaries();
+    list[i].update();
+    list[i].render(ctx);
+
+    if(callback) {
+      callback.call(null,list,i);
+    }
+    
+    if(list[i].dead()) {
+      let x = list[i].pos.x;
+      let y = list[i].pos.y;
+      like.push({ pos: new Vector(x, y) });
+      list.splice(i,1);
+    }
   }
 }
 
