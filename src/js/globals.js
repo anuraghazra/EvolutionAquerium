@@ -63,6 +63,17 @@ function batchUpdateAgents(list, like, dislike, callback) {
   }
 }
 
+function renderStats(data) {
+  renderData = '';
+  for (let i in data) {
+    renderData += ' | ' + i + ' : ' + data[i]
+  }
+  ctx.fillStyle = 'white';
+  ctx.font = '13px Arial';
+  ctx.fillText(renderData, 10,20);
+  ctx.fill();
+}
+
 function random(min, max) {
   return min+Math.random()*max;
 }

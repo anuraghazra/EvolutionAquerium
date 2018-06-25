@@ -1,4 +1,4 @@
-const mutationRate = 0.5;
+const mutationRate = 1;
 function Agent(x, y, radius, dna) {
   this.pos = new Vector(x, y);
   this.acc = new Vector(0, 0);
@@ -21,6 +21,9 @@ function Agent(x, y, radius, dna) {
   this.maxRadius = (this.sex === 'male') ? 15 : 10;
 
   this.dna = [];
+  this.mutate = function(index, mr, value) {
+    if(Math.random() < mr) { this.dna[index] += random(value[0],value[1]) }
+  } 
   if(dna == undefined) {
     // food wheight
     this.dna[0] = random(1,-1);
@@ -32,21 +35,13 @@ function Agent(x, y, radius, dna) {
     this.dna[3] = random(0,100);
   } else {
     this.dna[0] = dna[0];
-    if(Math.random() < mutationRate) {
-      this.dna[0] += random(0.5,-0.5);
-    }
     this.dna[1] = dna[1];
-    if(Math.random() < mutationRate) {
-      this.dna[1] += random(-0.5,0.1);
-    }
     this.dna[2] = dna[2];
-    if(Math.random() < mutationRate) {
-      this.dna[2] += random(-10,20);
-    }
     this.dna[3] = dna[3];
-    if(Math.random() < mutationRate) {
-      this.dna[3] += random(-10,20);
-    }
+    this.mutate(0, mutationRate, [0.1,-0.1]);
+    this.mutate(1, mutationRate, [-0.1,0.1]);
+    this.mutate(2, mutationRate, [-10,20]);
+    this.mutate(3, mutationRate, [-10,20]);
   }
   // if(this.sex === 'male' || this.sex === 'female') {
   //   console.log('food :' + this.dna[0] + '| poison : ' + this.dna[1])
@@ -60,6 +55,7 @@ function Agent(x, y, radius, dna) {
   } else if (this.sex === 'male') {
     this.name = names_male[Math.floor(random(0,names_male.length-1))]
   }
+
 
   // Update Position
   this.update = function() {
@@ -100,8 +96,8 @@ function Agent(x, y, radius, dna) {
     if(desire !== null) {
       desire.normalize();
       desire.mult(this.maxSpeed);
-      let steer =  desire.subBy(this.vel);
-      steer.limit(0.1);
+      let steer = Vector.sub(desire, this.vel);
+      steer.limit(this.maxForce);
       this.applyForce(steer);
     }
   }
@@ -146,7 +142,6 @@ function Agent(x, y, radius, dna) {
 
     let goodFood = this.eat(good, this.goodFoodDie, this.dna[2]);
     let badFood = this.eat(bad, this.badFoodDie, this.dna[3]);
-    
 
     if(!weights) {
       goodFood.mult(this.dna[0]);
@@ -155,21 +150,31 @@ function Agent(x, y, radius, dna) {
       goodFood.mult(weights[0]);
       badFood.mult(weights[1]);
     }
-
+    
     this.applyForce(goodFood);
     this.applyForce(badFood);
-    
   }
 
   // SEEK Algorithm
   this.seek = function(target) {
     let desired = null;
-    desired = target.pos.subBy(this.pos);
+    desired = Vector.sub(target.pos,this.pos);
     desired.setMag(this.maxSpeed);
 
-    let steer = desired.subBy(this.vel);
+    let steer = Vector.sub(desired,this.vel);
     steer.limit(this.maxForce);
     // this.applyForce(steer);
+    return steer;
+  }
+
+  // Separate Algorithm
+  this.separate = function(target) {
+    let desired = null;
+    desired = Vector.sub(target.pos,this.pos);
+    desired.setMag(this.maxSpeed);
+
+    let steer = Vector.sub(desired,this.vel);
+    steer.limit(this.maxForce);
     return steer;
   }
 
@@ -229,9 +234,7 @@ function Agent(x, y, radius, dna) {
         let d = dist(agentA.pos.x, agentA.pos.y, agentB.pos.x, agentB.pos.y);
         
         if (d < (agentB.radius+agentA.radius)) {
-          if ( ((agentB.sex === 'male' || agentA.sex === 'female') 
-            || (agentA.sex === 'male' || agentB.sex === 'female')) 
-            && (agentA.radius > 8 || agentB.radius > 8)) {
+          if ( (agentA.radius > 8 && agentB.radius > 8) ) {
 
             let x = agentB.pos.x + random(agentB.vel.x,agentA.vel.x);
             let y = agentB.pos.y + random(agentB.vel.y,agentA.vel.y);

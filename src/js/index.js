@@ -17,11 +17,11 @@ window.onload = function () {
 
   // ================================ ADD ITEMS
   function setup() {
-    addItem(food, random(50,150));
-    addItem(poison, random(10,50));
-    addCreatures(creatures, random(10,15));
-    addPredators(predators, random(2,8));
-    addAvoiders(avoiders, random(1,8));
+    addItem(food, random(20,100));
+    addItem(poison, random(50,20));
+    addCreatures(creatures, random(30,50));
+    // addPredators(predators, random(2,10));
+    addAvoiders(avoiders, random(5,8));
     // addItem(food, 10);
     // addItem(poison, 10);
     // addCreatures(creatures, 5);
@@ -46,7 +46,7 @@ window.onload = function () {
       case 'food' : 
         food.push({pos : new Vector(e.offsetX, e.offsetY)})
         break;
-      case 'Poison' : 
+      case 'poison' : 
         poison.push({pos : new Vector(e.offsetX, e.offsetY)})
         break;
     }
@@ -60,46 +60,67 @@ window.onload = function () {
     // agent
     batchUpdateAgents(creatures, food, poison, function(list, i) {
       let me = list[i];
-      let child = list[i].clone(0.001);
+      let child = list[i].clone(0.0015);
       if(child !== null) {
         list.push(child);
       }
-      me.defineFear(predators, -100, 200)
+      me.defineFear(predators, -5, 100);
+      me.defineFear(creatures, -5, 20);
     });
     
-    if(creatures.length > 0 && Math.random() < 0.3) {
-      creatures[0].reproduce(creatures);  
+    if(creatures.length > 0 && Math.random() < 0.8) {
+      creatures[0].reproduce(creatures);
     }
 
     // predators
     batchUpdateAgents(predators, poison, food, function(list, i) {
       let me = list[i];
-      me.defineFear(creatures, 1, 100, function(list, i) {
+      me.defineFear(creatures, 2, 200, function(list, i) {
         list.splice(i,1);
         me.health += me.goodFoodDie;
         me.radius += me.goodFoodDie;
+        if(me.radius > me.maxRadius) {me.radius = me.maxRadius}
       })
     });
     
     // avoiders
     batchUpdateAgents(avoiders, food, poison, function(list, i) {
       let me = list[i];
-      me.defineFear(predators, -1, me.dna[2], function(list, i) {
+      me.defineFear(predators, -1, 100, function(list, i) {
         me.health += me.badFoodDie;
       })
     });
 
     if(Math.random() < 0.03) {
-      addItem(food, 1);
+      addItem(food, 5);
     }
     if(Math.random() < 0.03) {
       addItem(poison, 1);
+    }
+    if(Math.random() < 0.005) {
+      addPredators(predators, 1);
+    }
+    if(Math.random() < 0.005) {
+      addAvoiders(avoiders, 1);
+    }
+    
+    if(creatures.length < 1) {
+      addCreatures(creatures, 5);
     }
     
 
     // render items
     renderItem(food,'white',1);
     renderItem(poison,'crimson',2);
+
+    renderStats({
+      'Good Creatures' : creatures.length,
+      'Predators' : predators.length,
+      'Avoiders' : avoiders.length,
+      'Foods' : food.length,
+      'Poison' : poison.length
+    })
+
 
     requestAnimationFrame(animate)
   }
