@@ -18,7 +18,7 @@ function Predator(x, y, radius, dna) {
   this.radius = radius;
 
   this.maxSpeed = 2;
-  this.maxForce = 0.01;
+  this.maxForce = 0.05;
 
   this.health = 1;
   this.healthDecrease = 0.002; 
@@ -29,9 +29,9 @@ function Predator(x, y, radius, dna) {
 
   this.dna = [];
   // food wheight
-  this.dna[0] = random(0.5,1);
+  this.dna[0] = 3;
   // poison wheight
-  this.dna[1] = random(-1,-0.8);
+  this.dna[1] = -5
   // food perception
   this.dna[2] = random(0,100);
   // posion perception
@@ -51,7 +51,7 @@ function Avoider(x, y, radius) {
   this.acc = new Vector(0, 0);
   this.vel = new Vector(0, 2);
 
-  this.radius = radius;
+  this.radius = 5;
 
   this.maxSpeed = 5;
   this.maxForce = 0.4;

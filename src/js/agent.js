@@ -1,4 +1,4 @@
-const mutationRate = 1;
+const mutationRate = 0.5;
 function Agent(x, y, radius, dna) {
   this.pos = new Vector(x, y);
   this.acc = new Vector(0, 0);
@@ -13,7 +13,7 @@ function Agent(x, y, radius, dna) {
   this.maxForce = 0.05;
 
   this.health = 1;
-  this.healthDecrease = 0.005; 
+  this.healthDecrease = 0.002; 
   this.goodFoodDie = 0.5;
   this.badFoodDie = -0.8;
   
@@ -26,9 +26,9 @@ function Agent(x, y, radius, dna) {
   } 
   if(dna == undefined) {
     // food wheight
-    this.dna[0] = random(1,-1);
+    this.dna[0] = 1;
     // poison wheight
-    this.dna[1] = random(-1,1);
+    this.dna[1] = -1;
     // food perception
     this.dna[2] = random(0,100);
     // posion perception
@@ -150,9 +150,20 @@ function Agent(x, y, radius, dna) {
       goodFood.mult(weights[0]);
       badFood.mult(weights[1]);
     }
-    
-    this.applyForce(goodFood);
-    this.applyForce(badFood);
+
+  }
+
+  this.flock = function(agents) {
+    let sep = this.separate(agents);
+    let ali = this.align(agents);
+    let coh = this.align(agents);
+    sep.mult(0.5);
+    ali.mult(0.2);
+    coh.mult(0.5);
+
+    this.applyForce(ali);
+    this.applyForce(coh);
+    this.applyForce(sep);
   }
 
   // SEEK Algorithm
@@ -168,14 +179,80 @@ function Agent(x, y, radius, dna) {
   }
 
   // Separate Algorithm
-  this.separate = function(target) {
-    let desired = null;
-    desired = Vector.sub(target.pos,this.pos);
-    desired.setMag(this.maxSpeed);
+  this.separate = function(agents) {
+    let desiredseperation = this.radius * 3;
+    let sum = new Vector();
+    let count = 0;
 
-    let steer = Vector.sub(desired,this.vel);
-    steer.limit(this.maxForce);
-    return steer;
+    for (let i = 0; i < agents.length; i++) {
+      let d = Vector.dist(this.pos, agents[i].pos);
+
+      if((d > 0) && (d < desiredseperation)) {
+        let diff = Vector.sub(this.pos, agents[i].pos);
+        diff.normalize();
+        diff.div(d);
+        sum.add(diff);
+        count++;
+      }
+    }
+
+    if(count > 0) {
+      sum.div(count);
+      sum.normalize();
+      sum.mult(this.maxSpeed);
+      let steer = Vector.sub(sum, this.vel);
+      steer.limit(this.maxForce);
+      return steer;
+    } else {
+      return new Vector(0,0)
+    }
+  }
+
+
+  this.align = function(agents) {
+    let neighbordist = 50;
+    let sum = new Vector(0,0);
+    let count = 0;
+
+    for (let i = 0; i < agents.length; i++) {
+      let d = Vector.dist(this.pos, agents[i].pos);
+      if((d > 0) && (d < neighbordist)) {
+        sum.add(agents[i].vel);
+        count++;
+      }
+    }
+    
+    if(count > 0) {
+      sum.div(count);
+      sum.normalize();
+      sum.mult(this.maxSpeed);
+      let steer = Vector.sub(sum, this.vel);
+      steer.limit(this.maxForce);
+      return steer;
+    } else {
+      return new Vector(0,0)
+    }
+  } 
+
+  this.cohesion = function(agents) {
+    let neighbordist = 20;
+    let sum = new Vector(0,0);
+    let count = 0;
+
+    for (let i = 0; i < agents.length; i++) {
+      let d = Vector.dist(this.pos, agents[i].pos);
+      if((d > 0) && (d < neighbordist)) {
+        sum.add(agents[i].pos);
+        count++;
+      }
+    }
+    
+    if(count > 0) {
+      sum.div(count);
+      return sum;
+    } else {
+      return new Vector(0,0)
+    }
   }
 
   /**

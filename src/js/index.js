@@ -19,16 +19,17 @@ window.onload = function () {
   function setup() {
     addItem(food, random(20,100));
     addItem(poison, random(50,20));
-    addCreatures(creatures, random(30,50));
+    addCreatures(creatures, random(50,100));
     // addPredators(predators, random(2,10));
     addAvoiders(avoiders, random(5,8));
     // addItem(food, 10);
     // addItem(poison, 10);
     // addCreatures(creatures, 5);
     // addPredators(predators, 1);
-    // addAvoiders(avoiders, random(1,8));
+    addAvoiders(avoiders, random(10,20));
   }
   setup();
+
 
   // UI add
   let add = document.getElementById('addnew');
@@ -75,7 +76,7 @@ window.onload = function () {
     // predators
     batchUpdateAgents(predators, poison, food, function(list, i) {
       let me = list[i];
-      me.defineFear(creatures, 2, 200, function(list, i) {
+      me.defineFear(creatures, 1, 200, function(list, i) {
         list.splice(i,1);
         me.health += me.goodFoodDie;
         me.radius += me.goodFoodDie;
@@ -104,7 +105,7 @@ window.onload = function () {
       addAvoiders(avoiders, 1);
     }
     
-    if(creatures.length < 1) {
+    if(creatures.length < 5) {
       addCreatures(creatures, 5);
     }
     
