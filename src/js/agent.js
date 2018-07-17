@@ -13,7 +13,7 @@ function Agent(x, y, radius, dna) {
   this.maxForce = 0.05;
 
   this.health = 1;
-  this.healthDecrease = 0.002; 
+  this.healthDecrease = 0.004; 
   this.goodFoodDie = 0.5;
   this.badFoodDie = -0.8;
   
