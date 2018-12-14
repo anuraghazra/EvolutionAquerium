@@ -110,7 +110,7 @@ function Agent(x, y, radius, dna) {
 
 
   /**
-   * Defines seek behaviour
+   * Defines seek Behavior
    * @param {array} wit 
    * @param {float} weight 
    * @param {int} perception 
@@ -140,11 +140,11 @@ function Agent(x, y, radius, dna) {
   }
 
   /**
-   * behaviours
+   * Behaviors
    * @param {*} good 
    * @param {*} bad 
    */
-  this.behaviour = function(good, bad, weights) {
+  this.Behavior = function(good, bad, weights) {
 
     let goodFood = this.eat(good, this.goodFoodDie, this.dna[2]);
     let badFood = this.eat(bad, this.badFoodDie, this.dna[3]);

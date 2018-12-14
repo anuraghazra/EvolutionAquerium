@@ -46,7 +46,7 @@ function renderItem(list, color, radius) {
 function batchUpdateAgents(list, like, dislike, weight, callback) {
   for (let i = list.length-1; i >= 0; i--) {  
     list[i].flock(list);
-    list[i].behaviour(like, dislike, weight);
+    list[i].Behavior(like, dislike, weight);
     list[i].boundaries();
     list[i].update();
     list[i].render(ctx);
