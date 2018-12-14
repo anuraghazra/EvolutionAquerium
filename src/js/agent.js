@@ -16,6 +16,12 @@ function Agent(x, y, radius, dna) {
   this.healthDecrease = 0.003; 
   this.goodFoodDie = 0.5;
   this.badFoodDie = -0.4;
+
+  this.flockMultiplier = {
+    separate : 0.8,
+    align : 0.2,
+    cohesion : 0.5
+  }
   
   this.sex = (Math.random() < 0.5) ? 'male' : 'female';
   this.maxRadius = (this.sex === 'male') ? 15 : 10;
@@ -30,18 +36,18 @@ function Agent(x, y, radius, dna) {
     // poison wheight
     this.dna[1] = -1;
     // food perception
-    this.dna[2] = random(0,100);
+    this.dna[2] = random(20,100);
     // posion perception
-    this.dna[3] = random(0,100);
+    this.dna[3] = random(20,100);
   } else {
     this.dna[0] = dna[0];
     this.dna[1] = dna[1];
     this.dna[2] = dna[2];
     this.dna[3] = dna[3];
-    this.mutate(0, mutationRate, [0.1,-0.1]);
-    this.mutate(1, mutationRate, [-0.1,0.1]);
-    this.mutate(2, mutationRate, [-10,20]);
-    this.mutate(3, mutationRate, [-10,20]);
+    this.mutate(0, mutationRate, [0.2, -0.2]);
+    this.mutate(1, mutationRate, [-0.2, 0.2]);
+    this.mutate(2, mutationRate, [-10, 20]);
+    this.mutate(3, mutationRate, [-10, 20]);
   }
   // if(this.sex === 'male' || this.sex === 'female') {
   //   console.log('food :' + this.dna[0] + '| poison : ' + this.dna[1])
@@ -151,15 +157,17 @@ function Agent(x, y, radius, dna) {
       badFood.mult(weights[1]);
     }
 
+    this.applyForce(goodFood);
+    this.applyForce(badFood);
   }
 
   this.flock = function(agents) {
     let sep = this.separate(agents);
     let ali = this.align(agents);
     let coh = this.align(agents);
-    sep.mult(0.5);
-    ali.mult(0.2);
-    coh.mult(0.5);
+    sep.mult(this.flockMultiplier.separate);
+    ali.mult(this.flockMultiplier.align);
+    coh.mult(this.flockMultiplier.cohesion);
 
     this.applyForce(ali);
     this.applyForce(coh);
@@ -208,7 +216,7 @@ function Agent(x, y, radius, dna) {
     }
   }
 
-
+  // align
   this.align = function(agents) {
     let neighbordist = 50;
     let sum = new Vector(0,0);
@@ -234,6 +242,7 @@ function Agent(x, y, radius, dna) {
     }
   } 
 
+  // cohesion
   this.cohesion = function(agents) {
     let neighbordist = 20;
     let sum = new Vector(0,0);

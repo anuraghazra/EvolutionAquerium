@@ -17,7 +17,7 @@ window.onload = function () {
 
   // ================================ ADD ITEMS
   function setup() {
-    addItem(food, random(20,100));
+    addItem(food, random(50,100));
     addItem(poison, random(50,20));
     addCreatures(creatures, random(50,100));
     addPredators(predators, random(2,10));
@@ -58,23 +58,25 @@ window.onload = function () {
     ctx.fillStyle = '#252525';
     ctx.fillRect(0, 0, width, height);
 
-    // agent
-    batchUpdateAgents(creatures, food, poison, function(list, i) {
+    // creatures
+    // array, food, poison, weights
+    batchUpdateAgents(creatures, food, poison, undefined, function(list, i) {
       let me = list[i];
       let child = list[i].clone(0.0015);
       if(child !== null) {
         list.push(child);
       }
-      me.defineFear(predators, -5, 50);
-      me.defineFear(creatures, -5, 20);
+      me.defineFear(predators, -4, 50);
+      // me.defineFear(creatures, -2, 20);
     });
     
+    if (creatures.length > 400) creatures.pop();
     if(creatures.length > 0 && Math.random() < 0.8) {
       creatures[0].reproduce(creatures);
     }
 
     // predators
-    batchUpdateAgents(predators, poison, food, function(list, i) {
+    batchUpdateAgents(predators, poison, food, undefined, function(list, i) {
       let me = list[i];
       me.defineFear(creatures, 1, 200, function(list, i) {
         list.splice(i,1);
@@ -85,12 +87,12 @@ window.onload = function () {
     });
     
     // avoiders
-    batchUpdateAgents(avoiders, food, poison, function(list, i) {
+    batchUpdateAgents(avoiders, food, poison, [0.8, -0.5], function(list, i) {
       let me = list[i];
       me.defineFear(predators, -1, 100, function(list, i) {
         me.health += me.badFoodDie;
       })
-      me.defineFear(poison, -0.5, 100, function(list, i) {
+      me.defineFear(poison, -1, 100, function(list, i) {
         me.health += me.badFoodDie;
       })
     });
@@ -108,8 +110,9 @@ window.onload = function () {
       addAvoiders(avoiders, 1);
     }
     
-    if(creatures.length < 5) {
-      addCreatures(creatures, 5);
+    if(food.length < 50) addItem(food, 20);
+    if(creatures.length < 50) {
+      addCreatures(creatures, 50);
     }
     
 
@@ -124,7 +127,6 @@ window.onload = function () {
       'Foods' : food.length,
       'Poison' : poison.length
     })
-
 
     requestAnimationFrame(animate)
   }

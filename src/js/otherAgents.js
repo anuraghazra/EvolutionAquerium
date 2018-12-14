@@ -21,9 +21,9 @@ function Predator(x, y, radius, dna) {
   this.maxForce = 0.05;
 
   this.health = 1;
-  this.healthDecrease = 0.002; 
+  this.healthDecrease = 0.003; 
   this.goodFoodDie = 0.5;
-  this.badFoodDie = -0.2;
+  this.badFoodDie = -0.5;
   this.sex = 'pradator';
   this.maxRadius = 20;
 
@@ -57,7 +57,7 @@ function Avoider(x, y, radius) {
   this.maxForce = 0.4;
 
   this.health = 1;
-  this.healthDecrease = 0.001;
+  this.healthDecrease = 0.0015;
   this.sex = 'avoider';
   this.maxRadius = 10;
 
