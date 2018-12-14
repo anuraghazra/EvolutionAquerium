@@ -57,22 +57,22 @@ function Avoider(x, y, radius) {
   this.maxForce = 0.4;
 
   this.health = 1;
-  this.healthDecrease = 0.002;
+  this.healthDecrease = 0.001;
   this.sex = 'avoider';
   this.maxRadius = 10;
 
   this.goodFoodDie = 0.5;
-  this.badFoodDie = -1;
+  this.badFoodDie = -0.5;
 
   this.dna = [];
   // food wheight
   this.dna[0] = random(0.8,-1);
   // poison wheight
-  this.dna[1] = random(-0.8,1);
+  this.dna[1] = random(1,5);
   // food perception
   this.dna[2] = random(0,100);
   // posion perception
-  this.dna[3] = random(0,100);
+  this.dna[3] = random(50,100);
 
   console.log('food :' + this.dna[0] + '| poison : ' + this.dna[1])
 

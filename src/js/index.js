@@ -20,13 +20,13 @@ window.onload = function () {
     addItem(food, random(20,100));
     addItem(poison, random(50,20));
     addCreatures(creatures, random(50,100));
-    // addPredators(predators, random(2,10));
+    addPredators(predators, random(2,10));
     addAvoiders(avoiders, random(5,8));
+    addAvoiders(avoiders, random(10,20));
     // addItem(food, 10);
     // addItem(poison, 10);
     // addCreatures(creatures, 5);
     // addPredators(predators, 1);
-    addAvoiders(avoiders, random(10,20));
   }
   setup();
 
@@ -65,7 +65,7 @@ window.onload = function () {
       if(child !== null) {
         list.push(child);
       }
-      me.defineFear(predators, -5, 100);
+      me.defineFear(predators, -5, 50);
       me.defineFear(creatures, -5, 20);
     });
     
@@ -88,6 +88,9 @@ window.onload = function () {
     batchUpdateAgents(avoiders, food, poison, function(list, i) {
       let me = list[i];
       me.defineFear(predators, -1, 100, function(list, i) {
+        me.health += me.badFoodDie;
+      })
+      me.defineFear(poison, -0.5, 100, function(list, i) {
         me.health += me.badFoodDie;
       })
     });

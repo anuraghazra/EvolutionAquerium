@@ -13,9 +13,9 @@ function Agent(x, y, radius, dna) {
   this.maxForce = 0.05;
 
   this.health = 1;
-  this.healthDecrease = 0.004; 
+  this.healthDecrease = 0.003; 
   this.goodFoodDie = 0.5;
-  this.badFoodDie = -0.8;
+  this.badFoodDie = -0.4;
   
   this.sex = (Math.random() < 0.5) ? 'male' : 'female';
   this.maxRadius = (this.sex === 'male') ? 15 : 10;
