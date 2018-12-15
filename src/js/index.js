@@ -8,7 +8,8 @@ canvas.height = height;
 let ctx = canvas.getContext('2d');
 
 window.onload = function () {
-  let MAX_CREATURES = 400;
+  let MAX_CREATURES = 350;
+  const REPRODUCTION_RATE = 0.4;
 
   if (typeof window.orientation !== 'undefined') { MAX_CREATURES = 200 } 
 
@@ -57,12 +58,13 @@ window.onload = function () {
   })
 
 
+  //  ANIMATE LOOP
   function animate() {
     ctx.fillStyle = '#252525';
     ctx.fillRect(0, 0, width, height);
 
     // creatures
-    // array, food, poison, weights
+    // array, likes, dislikes, weights, callback
     batchUpdateAgents(creatures, food, poison, undefined, function(list, i) {
       let me = list[i];
       let child = list[i].clone(0.0015);
@@ -74,7 +76,7 @@ window.onload = function () {
     });
     
     if (creatures.length > MAX_CREATURES) creatures.pop();
-    if(creatures.length > 0 && Math.random() < 0.8) {
+    if(creatures.length > 0 && Math.random() < REPRODUCTION_RATE) {
       creatures[0].reproduce(creatures);
     }
 

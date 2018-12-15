@@ -1,3 +1,7 @@
+// * I WILL REFACTOR IT LATER
+// * I WILL REFACTOR IT LATER
+// * I WILL REFACTOR IT LATER
+
 function addCreatures(list, max) {
   for (let i = 0; i < max; i++) {
     let x = Math.random() * width;
@@ -33,6 +37,8 @@ function addItem(list, max, xx, yy) {
     list.push({ pos: new Vector(x, y) });
   }
 }
+
+
 function renderItem(list, color, radius) {
   for (let i = 0; i < list.length; i++) {
     ctx.beginPath();
@@ -43,6 +49,17 @@ function renderItem(list, color, radius) {
   }
 }
 
+
+/**
+ * @method batchUpdateAgents()
+ * @param {Array} list 
+ * @param {Array} like 
+ * @param {Array} dislike 
+ * @param {2DArray} weight 
+ * @param {Function} callback 
+ * updates the flocking, behavior, boundaries, and renders all the agents
+ * and also checks for dead state
+ */
 function batchUpdateAgents(list, like, dislike, weight, callback) {
   for (let i = list.length-1; i >= 0; i--) {  
     list[i].flock(list);
@@ -64,6 +81,11 @@ function batchUpdateAgents(list, like, dislike, weight, callback) {
   }
 }
 
+
+/**
+ * @metod renderStats()
+ * @param {*} data 
+ */
 function renderStats(data) {
   renderData = '';
   for (let i in data) {
@@ -75,9 +97,9 @@ function renderStats(data) {
   ctx.fill();
 }
 
-function random(min, max) {
-  return min+Math.random()*max;
-}
+
+/** UTILS */
+function random(min, max) { return min+Math.random()*max }
 function clamp(min, max, value) {
   if(value > max) {
     return value;
