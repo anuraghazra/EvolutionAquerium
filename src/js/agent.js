@@ -415,7 +415,7 @@ class Agent {
     else if (this.sex === 'female') {
       ctx.fillStyle = 'rgba(255,39,201,' + this.health + ')';
     }
-    else if (this.sex === 'pradator') {
+    else if (this.sex === 'predator') {
       ctx.fillStyle = 'rgba(255,0,0,' + this.health + ')';
     }
     else if (this.sex === 'avoider') {

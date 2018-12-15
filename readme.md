@@ -59,18 +59,21 @@ And for the most important part, i added a **`defineFear()`** method which handl
 
 It's a robust function to define fear which can be also used inversly with negative values.
 
+**`defineFear()`** function allows Agents to add Steering Forces simultaneously on each other
+
+
 ```javascript
 // list, weight, perception, ?callback
 creature.defineFear(predators, -4, 50);
 ```
 
 ## Reproduction System
-Reproduction System checks for `male` and `female` agents and if their `radius` is greater than 8 and they are close enough to each other, then they can reproduce with their specific `DNA`.
+Reproduction System checks for `male` and `female` agents and if their `radius` is greater than 8 and they are close enough to each other, then they can reproduce with their specific `DNA` and creates a small Agent based on their DNA data and with some mutation. 
 
 
-# Predator class
+# Predator class 
 Predators are simple but deadly 
-they just has a `sex` property set to 'predator' and `color` to 'red'
+they just has a `sex` property set to 'predator'
 
 and i used **`defineFear()`** function inversely to attack the Creatures
 
@@ -79,7 +82,10 @@ And bigger they get slower they became.
 # Avoider Class
 
 Avoiders are very very very fast but they are very agile too.
-they just has a `sex` property set to 'avoider' and `color` to 'orange'
+they just has a `sex` property set to 'avoider'
+
+
+and i used **`defineFear()`** function to avoid every poison and Predator.
 
 -----------
 

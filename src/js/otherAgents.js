@@ -12,7 +12,7 @@ class Predator extends Agent {
    * @param {Array} dna 
    */
   constructor(x, y, radius, dna) {
-    super(x, y, radius, dna);
+    super();
     
     this.pos = new Vector(x, y);
     this.acc = new Vector(0, 0);
