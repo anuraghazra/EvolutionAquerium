@@ -19,8 +19,8 @@ function Agent(x, y, radius, dna) {
 
   this.flockMultiplier = {
     separate : 0.8,
-    align : 0.2,
-    cohesion : 0.5
+    align : 0.5,
+    cohesion : 0.4
   }
   
   this.sex = (Math.random() < 0.5) ? 'male' : 'female';
@@ -164,14 +164,14 @@ function Agent(x, y, radius, dna) {
   this.flock = function(agents) {
     let sep = this.separate(agents);
     let ali = this.align(agents);
-    let coh = this.align(agents);
+    let coh = this.cohesion(agents);
     sep.mult(this.flockMultiplier.separate);
     ali.mult(this.flockMultiplier.align);
     coh.mult(this.flockMultiplier.cohesion);
 
+    this.applyForce(sep);
     this.applyForce(ali);
     this.applyForce(coh);
-    this.applyForce(sep);
   }
 
   // SEEK Algorithm
@@ -195,7 +195,7 @@ function Agent(x, y, radius, dna) {
     for (let i = 0; i < agents.length; i++) {
       let d = Vector.dist(this.pos, agents[i].pos);
 
-      if((d > 0) && (d < desiredseperation)) {
+      if(agents[i] !== this && (d > 0) && (d < desiredseperation)) {
         let diff = Vector.sub(this.pos, agents[i].pos);
         diff.normalize();
         diff.div(d);
@@ -224,7 +224,7 @@ function Agent(x, y, radius, dna) {
 
     for (let i = 0; i < agents.length; i++) {
       let d = Vector.dist(this.pos, agents[i].pos);
-      if((d > 0) && (d < neighbordist)) {
+      if(agents[i] != this && (d > 0) && (d < neighbordist)) {
         sum.add(agents[i].vel);
         count++;
       }
@@ -244,13 +244,13 @@ function Agent(x, y, radius, dna) {
 
   // cohesion
   this.cohesion = function(agents) {
-    let neighbordist = 20;
+    let neighbordist = 30;
     let sum = new Vector(0,0);
     let count = 0;
 
     for (let i = 0; i < agents.length; i++) {
       let d = Vector.dist(this.pos, agents[i].pos);
-      if((d > 0) && (d < neighbordist)) {
+      if(agents[i] !== this && (d > 0) && (d < neighbordist)) {
         sum.add(agents[i].pos);
         count++;
       }
@@ -258,7 +258,12 @@ function Agent(x, y, radius, dna) {
     
     if(count > 0) {
       sum.div(count);
-      return sum;
+      sum.sub(this.pos);
+      sum.normalize();
+      sum.mult(this.maxSpeed);
+      let steer = Vector.sub(sum, this.vel);
+      steer.limit(this.maxForce);
+      return steer;
     } else {
       return new Vector(0,0)
     }
