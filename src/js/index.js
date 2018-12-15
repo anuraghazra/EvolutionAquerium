@@ -8,6 +8,9 @@ canvas.height = height;
 let ctx = canvas.getContext('2d');
 
 window.onload = function () {
+  let MAX_CREATURES = 400;
+
+  if (typeof window.orientation !== 'undefined') { MAX_CREATURES = 200 } 
 
   let predators = [];
   let creatures = [];
@@ -70,7 +73,7 @@ window.onload = function () {
       // me.defineFear(creatures, -2, 20);
     });
     
-    if (creatures.length > 400) creatures.pop();
+    if (creatures.length > MAX_CREATURES) creatures.pop();
     if(creatures.length > 0 && Math.random() < 0.8) {
       creatures[0].reproduce(creatures);
     }
