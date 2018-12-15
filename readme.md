@@ -1,4 +1,10 @@
 # Evolution Aquerium
+[![](https://img.shields.io/github/license/anuraghazra/EvolutionAquerium.svg)](https://github.com/anuraghazra/EvolutionAquerium/blob/master/LICENSE)
+[![](https://img.shields.io/github/stars/anuraghazra/EvolutionAquerium.svg)](https://github.com/anuraghazra/EvolutionAquerium)
+
+![](https://img.shields.io/badge/flocking-behavior-orange.svg)
+![](https://img.shields.io/badge/Creative-Coding-ff69b4.svg)
+
 
 <a href="https://anuraghazra.github.io/EvolutionAquerium">Try Out The demo</a>
 
