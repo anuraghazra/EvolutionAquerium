@@ -59,7 +59,7 @@ creature.defineFear(predators, -4, 50);
 ```
 
 ## Reproduction System
-Reproduction System uses checks for `male` and `female` agents and if their `radius` is greater than 8 and they are close enough to each other, then they can reproduce with their specific `DNA`.
+Reproduction System checks for `male` and `female` agents and if their `radius` is greater than 8 and they are close enough to each other, then they can reproduce with their specific `DNA`.
 
 
 # Predator class

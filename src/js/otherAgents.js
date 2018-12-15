@@ -24,7 +24,7 @@ class Predator extends Agent {
     this.healthDecrease = 0.003;
     this.goodFoodDie = 0.5;
     this.badFoodDie = -0.5;
-    this.sex = 'pradator';
+    this.sex = 'predator';
     this.maxRadius = 20;
     this.dna = [];
     // food wheight
