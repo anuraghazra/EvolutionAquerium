@@ -28,7 +28,7 @@ window.onload = function () {
     addPredators(predators, random(2, 10));
     addAvoiders(avoiders, random(5, 8));
     addAvoiders(avoiders, random(10, 20));
-    addEaters(eaters, random(2, 5));
+    addEaters(eaters, random(1, 4));
 
     // UI add
     let add = document.getElementById('addnew');
@@ -136,7 +136,7 @@ window.onload = function () {
 
     if (food.length < 50) addItem(food, 20);
     if (creatures.length < 50) addCreatures(creatures, 50);
-    if (eaters.length < 1) addCreatures(eaters, 1);
+    if (eaters.length < 1) addEaters(eaters, 1);
 
 
     // render items

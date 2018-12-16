@@ -101,7 +101,7 @@ class Eater extends Agent {
     this.acc = new Vector(0, 0);
     this.vel = new Vector(0, 2);
     this.radius = 5;
-    this.maxSpeed = 1.6;
+    this.maxSpeed = 1.7;
     this.maxForce = 0.05;
     this.health = 1;
     this.healthDecrease = 0.001;
