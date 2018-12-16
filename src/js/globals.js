@@ -26,6 +26,14 @@ function addAvoiders(list, max) {
     list.push(new Avoider(x, y, radius));
   }
 }
+function addEaters(list, max) {
+  for (let i = 0; i < max; i++) {
+    let x = Math.random() * width;
+    let y = Math.random() * height;
+    let radius = 3 + Math.random() * 8;
+    list.push(new Eater(x, y, radius));
+  }
+}
 function addItem(list, max, xx, yy) {
   for (let i = 0; i < max; i++) {
     let x = xx;
@@ -43,6 +51,7 @@ function renderItem(list, color, radius) {
   for (let i = 0; i < list.length; i++) {
     ctx.beginPath();
     ctx.fillStyle = color;
+    // ctx.fillRect(list[i].pos.x, list[i].pos.y, radius*2, radius*2);
     ctx.arc(list[i].pos.x, list[i].pos.y, (radius || 5), 0, Math.PI * 2);
     ctx.fill();
     ctx.closePath();
@@ -68,6 +77,10 @@ function batchUpdateAgents(list, like, dislike, weight, callback) {
     list[i].update();
     list[i].render(ctx);
 
+    // DEBUG
+    if (document.getElementById('render_health').checked) list[i].renderHealth(ctx);
+    if (document.getElementById('debug').checked) list[i].renderDebug(ctx)
+    
     if(callback) {
       callback.call(null,list,i);
     }
@@ -114,4 +127,7 @@ function dist(px, py, qx, qy) {
   let dx = px-qx;
   let dy = py-qy;
   return Math.sqrt(dx*dx+dy*dy);
+}
+function rgba(r, g, b, a) {
+  return `rgba(${r},${g},${b},${a})`;
 }

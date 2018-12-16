@@ -17,6 +17,7 @@
     * {
       font-family: 'Century Gothic';
       user-select: none;
+      /* color: rgb(0, 191, 255) */
     }
     body {
       margin: 0;
@@ -52,7 +53,7 @@
       right: 0;
       background-color: white;
       border-radius: 0 0 0 5px;
-      opacity: 0.4;
+      opacity: 0.8;
     }
     .github:hover {
       opacity: 1;
@@ -73,6 +74,10 @@
       Show Names
       <input type="checkbox" id="names">
     </label>
+    <label>
+      Render Health
+      <input type="checkbox" id="render_health">
+    </label>
 
     <label>
       Add New
@@ -80,8 +85,10 @@
         <option value="agent">Agent</option>
         <option value="predator">Predator</option>
         <option value="avoider">Avoider</option>
+        <option value="eater">Eater</option>
         <option value="food">Food</option>
         <option value="poison">Poison</option>
+        
       </select>
     </label>
 

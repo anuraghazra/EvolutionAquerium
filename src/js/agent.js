@@ -13,7 +13,7 @@ class Agent {
    * @param {Number} radius 
    * @param {Array} dna 
    */
-  constructor(x, y, radius, dna) {
+  constructor(x, y, radius, dna, color) {
     this.pos = new Vector(x, y);
     this.acc = new Vector(0, 0);
     this.vel = new Vector(0, -2);
@@ -24,8 +24,8 @@ class Agent {
     this.maxForce = 0.05;
     this.health = 1;
     this.healthDecrease = 0.003;
-    this.goodFoodDie = 0.5;
-    this.badFoodDie = -0.4;
+    this.goodFoodMultiplier = 0.5;
+    this.badFoodMultiplier = -0.4;
 
     /**
      * ? flockMultiplier //
@@ -91,6 +91,10 @@ class Agent {
     this.pos.add(this.vel);
     this.acc.mult(0);
     this.health -= this.healthDecrease;
+    if (this.health > 1) {
+      this.health = 1;
+    }
+    if(this.radius > this.maxRadius) {this.radius = this.maxRadius}
   }
   
   /**
@@ -177,8 +181,8 @@ class Agent {
    * food and poison handling 
    */
   Behavior (good, bad, weights) {
-    let goodFood = this.eat(good, this.goodFoodDie, this.dna[2]);
-    let badFood = this.eat(bad, this.badFoodDie, this.dna[3]);
+    let goodFood = this.eat(good, this.goodFoodMultiplier, this.dna[2]);
+    let badFood = this.eat(bad, this.badFoodMultiplier, this.dna[3]);
     if (!weights) {
       goodFood.mult(this.dna[0]);
       badFood.mult(this.dna[1]);
@@ -338,9 +342,6 @@ class Agent {
         if (this.radius > this.maxRadius) {
           this.radius = this.maxRadius;
         }
-        if (this.health > 1) {
-          this.health = 1;
-        }
       }
       else {
         if (d < record && d < perception) {
@@ -398,29 +399,63 @@ class Agent {
   }
 
 
+  renderHealth(ctx) {
+    ctx.save();
+    ctx.translate(this.pos.x, this.pos.y);
+    ctx.fillStyle = 'white';
+    ctx.fillRect(-10, -10, this.health*20, 3);
+    ctx.lineWidth = 0.3;
+    ctx.strokeStyle = 'white';
+    ctx.strokeRect(-10, -10, 1*20, 2);
+    ctx.restore();
+  }
+
+  renderDebug(ctx) {
+    ctx.save();
+    ctx.translate(this.pos.x, this.pos.y);
+    ctx.beginPath();
+    ctx.strokeStyle = 'green';
+    ctx.arc(0, 0, clamp(0, 100, this.dna[2]), 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.closePath();
+    ctx.beginPath();
+    ctx.strokeStyle = 'red';
+    ctx.arc(0, 0, clamp(0, 100, this.dna[3]), 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.closePath();
+    ctx.restore();
+  }
+      
+
   /**
    * Render Agent
    * @param {CanvasRenderingContext2D} ctx
    */
   render(ctx) {
     ctx.beginPath();
+
     if (document.getElementById('names').checked) {
       ctx.fillStyle = 'white';
       ctx.fillText(this.name, this.pos.x - this.radius, this.pos.y - this.radius - 5);
       ctx.fill();
     }
+
     if (this.sex === 'male') {
-      ctx.fillStyle = 'rgba(0,170,0,' + this.health + ')';
+      ctx.fillStyle = rgba(0, 170, 0, this.health);
     }
     else if (this.sex === 'female') {
-      ctx.fillStyle = 'rgba(255,39,201,' + this.health + ')';
+      ctx.fillStyle = rgba(255, 39, 201, this.health);
     }
     else if (this.sex === 'predator') {
-      ctx.fillStyle = 'rgba(255,0,0,' + this.health + ')';
+      ctx.fillStyle = rgba(255, 0, 0, this.health);
     }
     else if (this.sex === 'avoider') {
-      ctx.fillStyle = 'rgba(255, 165, 0, ' + this.health + ')';
+      ctx.fillStyle = rgba(255, 165, 0, this.health);
+    } else if (this.sex === 'eater') {
+      // rgb(0, 191, 255)
+      ctx.fillStyle = rgba(0, 191, 255, this.health);
     }
+
     let angle = this.vel.heading() + Math.PI / 180;
     ctx.save();
     ctx.translate(this.pos.x, this.pos.y);
@@ -430,20 +465,8 @@ class Agent {
     ctx.lineTo(-this.radius, this.radius - 4);
     ctx.lineTo(this.radius, 0);
     ctx.fill();
-    // DEBUG
-    if (document.getElementById('debug').checked) {
-      ctx.beginPath();
-      ctx.strokeStyle = 'green';
-      ctx.arc(0, 0, clamp(0, 100, this.dna[2]), 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.closePath();
-      ctx.beginPath();
-      ctx.strokeStyle = 'red';
-      ctx.arc(0, 0, clamp(0, 100, this.dna[3]), 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.closePath();
-    }
-    ctx.closePath();
     ctx.restore();
+
+    ctx.closePath();
   }
 }
