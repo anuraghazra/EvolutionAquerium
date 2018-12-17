@@ -26,14 +26,15 @@ class Agent {
     this.healthDecrease = 0.003;
     this.goodFoodMultiplier = 0.5;
     this.badFoodMultiplier = -0.4;
+    this.flock = new Flock(this);
 
     /**
      * ? flockMultiplier //
      */
     this.flockMultiplier = {
-      separate: 0.8,
-      align: 0.7,
-      cohesion: 0.4
+      separate: -0.1,
+      align: 0.8,
+      cohesion: 0.7
     };
 
     
@@ -149,26 +150,26 @@ class Agent {
    * @param {Function} callback
    * a robust function to define fear which also can be used inversly 
    */
-  defineFear (wit, weight, perception, callback) {
+  defineFear (list, weight, perception, callback) {
     let record = Infinity;
     let close = null;
-    for (let i = wit.length - 1; i >= 0; i--) {
-      let d = dist(this.pos.x, this.pos.y, wit[i].pos.x, wit[i].pos.y);
+    for (let i = list.length - 1; i >= 0; i--) {
+      let d = dist(this.pos.x, this.pos.y, list[i].pos.x, list[i].pos.y);
       if (d < this.radius) {
         if (callback) {
-          callback.call(null, wit, i);
+          callback.call(null, list, i);
         }
       }
       else {
         if (d < record && d < perception) {
           record = d;
-          close = wit[i];
+          close = list[i];
         }
       }
     }
     // seek
     if (close !== null) {
-      this.applyForce(this.seek(close).mult(weight));
+      this.applyForce(this.flock.seek(close).mult(weight));
     }
   }
 
@@ -196,14 +197,14 @@ class Agent {
   }
 
   /**
-   * @method flock()
+   * @method applyFlock()
    * @param {*} agents 
    * calculates all the flocking code apply it to the acceleration
    */
-  flock (agents) {
-    let sep = this.separate(agents);
-    let ali = this.align(agents);
-    let coh = this.cohesion(agents);
+  applyFlock (agents) {
+    let sep = this.flock.separate(agents);
+    let ali = this.flock.align(agents);
+    let coh = this.flock.cohesion(agents);
     sep.mult(this.flockMultiplier.separate);
     ali.mult(this.flockMultiplier.align);
     coh.mult(this.flockMultiplier.cohesion);
@@ -212,115 +213,19 @@ class Agent {
     this.applyForce(coh);
   }
 
-
   /**
-   * @method seek()
-   * @param {*} target 
-   * simple method to seek something
+   * @method updateFlockBehavior()
+   * @param {*} separate 
+   * @param {*} align 
+   * @param {*} cohesion 
    */
-  seek (target) {
-    let desired = null;
-    desired = Vector.sub(target.pos, this.pos);
-    desired.setMag(this.maxSpeed);
-    let steer = Vector.sub(desired, this.vel);
-    steer.limit(this.maxForce);
-    // this.applyForce(steer);
-    return steer;
+  updateFlockBehavior(separate, align, cohesion) {
+    this.flockMultiplier = {
+      separate: parseFloat(separate),
+      align: parseFloat(align),
+      cohesion: parseFloat(cohesion)
+    };
   }
-
-
-  /**
-   * @method separate()
-   * @param {Array} agents 
-   * part of flocking system
-   */
-  separate (agents) {
-    let desiredseperation = this.radius * 4;
-    let sum = new Vector();
-    let count = 0;
-    for (let i = 0; i < agents.length; i++) {
-      let d = Vector.dist(this.pos, agents[i].pos);
-      if (agents[i] !== this && (d > 0) && (d < desiredseperation)) {
-        let diff = Vector.sub(this.pos, agents[i].pos);
-        diff.normalize();
-        diff.div(d);
-        sum.add(diff);
-        count++;
-      }
-    }
-    if (count > 0) {
-      sum.div(count);
-      sum.normalize();
-      sum.mult(this.maxSpeed);
-      let steer = Vector.sub(sum, this.vel);
-      steer.limit(this.maxForce);
-      return steer;
-    }
-    else {
-      return new Vector(0, 0);
-    }
-  };
-
-  /**
-   * @method align()
-   * @param {Array} agents 
-   * part of flocking system
-   */
-  align (agents) {
-    let neighbordist = 50;
-    let sum = new Vector(0, 0);
-    let count = 0;
-    for (let i = 0; i < agents.length; i++) {
-      let d = Vector.dist(this.pos, agents[i].pos);
-      if (agents[i] != this && (d > 0) && (d < neighbordist)) {
-        sum.add(agents[i].vel);
-        count++;
-      }
-    }
-    if (count > 0) {
-      sum.div(count);
-      sum.normalize();
-      sum.mult(this.maxSpeed);
-      let steer = Vector.sub(sum, this.vel);
-      steer.limit(this.maxForce);
-      return steer;
-    }
-    else {
-      return new Vector(0, 0);
-    }
-  }
-
-
-  /**
-   * @method cohesion()
-   * @param {Array} agents 
-   * part of flocking system
-   */
-  cohesion (agents) {
-    let neighbordist = 20;
-    let sum = new Vector(0, 0);
-    let count = 0;
-    for (let i = 0; i < agents.length; i++) {
-      let d = Vector.dist(this.pos, agents[i].pos);
-      if (agents[i] !== this && (d > 0) && (d < neighbordist)) {
-        sum.add(agents[i].pos);
-        count++;
-      }
-    }
-    if (count > 0) {
-      sum.div(count);
-      sum.sub(this.pos);
-      sum.normalize();
-      sum.mult(this.maxSpeed);
-      let steer = Vector.sub(sum, this.vel);
-      steer.limit(this.maxForce);
-      return steer;
-    }
-    else {
-      return new Vector(0, 0);
-    }
-  }
-
 
   /**
    * Eat Food
@@ -352,7 +257,7 @@ class Agent {
     }
     // seek
     if (close !== null) {
-      return this.seek(close);
+      return this.flock.seek(close);
     }
     return new Vector(0, 0);
   }
@@ -401,29 +306,25 @@ class Agent {
 
   renderHealth(ctx) {
     ctx.save();
-    ctx.translate(this.pos.x, this.pos.y);
     ctx.fillStyle = 'white';
-    ctx.fillRect(-10, -10, this.health*20, 3);
+    ctx.fillRect(this.pos.x-10, this.pos.y-10, this.health*20, 3);
     ctx.lineWidth = 0.3;
     ctx.strokeStyle = 'white';
-    ctx.strokeRect(-10, -10, 1*20, 2);
+    ctx.strokeRect(this.pos.x-10, this.pos.y-10, 1*20, 2);
     ctx.restore();
   }
 
   renderDebug(ctx) {
-    ctx.save();
-    ctx.translate(this.pos.x, this.pos.y);
     ctx.beginPath();
     ctx.strokeStyle = 'green';
-    ctx.arc(0, 0, clamp(0, 100, this.dna[2]), 0, Math.PI * 2);
+    ctx.arc(this.pos.x, this.pos.y, clamp(0, 100, this.dna[2]), 0, Math.PI * 2);
     ctx.stroke();
     ctx.closePath();
     ctx.beginPath();
     ctx.strokeStyle = 'red';
-    ctx.arc(0, 0, clamp(0, 100, this.dna[3]), 0, Math.PI * 2);
+    ctx.arc(this.pos.x, this.pos.y, clamp(0, 100, this.dna[3]), 0, Math.PI * 2);
     ctx.stroke();
     ctx.closePath();
-    ctx.restore();
   }
       
 
@@ -432,6 +333,7 @@ class Agent {
    * @param {CanvasRenderingContext2D} ctx
    */
   render(ctx) {
+
     ctx.beginPath();
 
     if (document.getElementById('names').checked) {
@@ -468,5 +370,6 @@ class Agent {
     ctx.restore();
 
     ctx.closePath();
+
   }
 }

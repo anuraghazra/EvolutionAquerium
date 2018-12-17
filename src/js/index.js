@@ -8,8 +8,8 @@ canvas.height = height;
 let ctx = canvas.getContext('2d');
 
 window.onload = function () {
-  let MAX_CREATURES = 350;
-  const REPRODUCTION_RATE = 0.4;
+  let MAX_CREATURES = 300;
+  const REPRODUCTION_RATE = 0.004;
 
   if (typeof window.orientation !== 'undefined') { MAX_CREATURES = 200 }
 
@@ -26,8 +26,7 @@ window.onload = function () {
     addItem(poison, random(50, 20));
     addCreatures(creatures, random(50, 100));
     addPredators(predators, random(2, 10));
-    addAvoiders(avoiders, random(5, 8));
-    addAvoiders(avoiders, random(10, 20));
+    addAvoiders(avoiders, random(20, 25));
     addEaters(eaters, random(1, 4));
 
     // UI add
@@ -58,6 +57,9 @@ window.onload = function () {
   setup();
 
 
+  var lastframe;
+  var fps;
+
   //  ANIMATE LOOP
   function animate() {
     ctx.fillStyle = '#252525';
@@ -73,12 +75,14 @@ window.onload = function () {
       }
       me.defineFear(predators, -4, 50);
       me.defineFear(eaters, -2, 100);
+
+      if (creatures.length > 0 && random(1) < REPRODUCTION_RATE && creatures.length < MAX_CREATURES) {
+        me.reproduce(creatures);
+      }
     });
 
     if (creatures.length > MAX_CREATURES) creatures.pop();
-    if (creatures.length > 0 && Math.random() < REPRODUCTION_RATE) {
-      creatures[0].reproduce(creatures);
-    }
+
 
     // predators
     batchUpdateAgents(predators, poison, food, undefined, function (list, i) {
@@ -88,7 +92,7 @@ window.onload = function () {
         me.health += me.goodFoodMultiplier;
         me.radius += me.goodFoodMultiplier;
       })
-      me.defineFear(eaters, -50, 100);
+      me.defineFear(eaters, -10, 50);
     });
 
     // avoiders
@@ -107,7 +111,7 @@ window.onload = function () {
     // eaters
     batchUpdateAgents(eaters, poison, poison, [1, 1], function (list, i) {
       let me = list[i];
-      if (random(0, 1) < 0.1) {
+      if (random(0, 1) < 0.05) {
         addItem(food, 1, me.pos.x, me.pos.y)
       }
       me.defineFear(creatures, 1.0, 100, function (list, i) {
@@ -126,13 +130,13 @@ window.onload = function () {
       })
       me.defineFear(poison, -5, 100);
     });
-
+    
 
     // Add And Reset
-    if (Math.random() < 0.03) addItem(food, 5);
-    if (Math.random() < 0.03) addItem(poison, 1);
-    if (Math.random() < 0.005) addPredators(predators, 1);
-    if (Math.random() < 0.005) addAvoiders(avoiders, 1);
+    if (random(1) < 0.03) addItem(food, 5);
+    if (random(1) < 0.03) addItem(poison, 1);
+    if (random(1) < 0.005) addPredators(predators, 1);
+    if (random(1) < 0.005) addAvoiders(avoiders, 1);
 
     if (food.length < 50) addItem(food, 20);
     if (creatures.length < 50) addCreatures(creatures, 50);
@@ -140,7 +144,7 @@ window.onload = function () {
 
 
     // render items
-    renderItem(food, 'white', 1);
+    renderItem(food, 'white', 1, true);
     renderItem(poison, 'crimson', 2);
 
     renderStats({
@@ -149,10 +153,19 @@ window.onload = function () {
       'Avoiders': avoiders.length,
       'Eaters': eaters.length,
       'Foods': food.length,
-      'Poison': poison.length
+      'Poison': poison.length,
+      'FPS' : fps
     })
-
-    requestAnimationFrame(animate)
+    
+    requestAnimationFrame(animate);
+    if(!lastframe) {
+      lastframe = Date.now();
+      fps = 0;
+      return;
+    }
+    delta = (Date.now() - lastframe)/1000;
+    lastframe = Date.now();
+    fps = (1/delta).toFixed(2);
   }
   animate();
 

@@ -58,7 +58,7 @@ class Avoider extends Agent {
     this.vel = new Vector(0, 2);
     this.radius = 5;
     this.maxSpeed = 4;
-    this.maxForce = 0.4;
+    this.maxForce = 0.2;
     this.health = 1;
     this.healthDecrease = 0.003;
     this.sex = 'avoider';

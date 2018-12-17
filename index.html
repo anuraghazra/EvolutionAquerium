@@ -3,14 +3,14 @@
 <head>
   <title>Evolution Aquerium</title>
   <!-- Global site tag (gtag.js) - Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-119972196-2"></script>
+  <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=UA-119972196-2"></script>
 	<script>
 		window.dataLayer = window.dataLayer || [];
 		function gtag(){dataLayer.push(arguments);}
 		gtag('js', new Date());
 
 		gtag('config', 'UA-119972196-1');
-	</script>
+	</script> -->
 
 
   <style>
@@ -58,6 +58,18 @@
     .github:hover {
       opacity: 1;
     }
+
+    label {
+      font-size: 14px;
+    }
+    input[type="range"] {
+      position: relative;
+      top: 5px;
+      font-size: 14px;
+      padding: 0px;
+      margin: 0px;
+      
+    }
   </style>
 </head>
 <body>
@@ -67,7 +79,7 @@
   <div class="controls">
 
     <label>
-      Debug Mode
+      Debug
       <input type="checkbox" id="debug">
     </label>
     <label>
@@ -92,9 +104,25 @@
       </select>
     </label>
 
+    <label>
+      separate
+      <input type="range" id="separate" max="1.0" min="-1.0" step="0.1" value="0.8">
+    </label>
+
+    <label>
+      align
+      <input type="range" id="align" max="1.0" min="-1.0" step="0.1" value="0.6">
+    </label>
+
+    <label>
+      cohesion
+      <input type="range" id="cohesion" max="1.0" min="-1.0" step="0.1" value="0.3">
+    </label>
+
   </div>
 
   <script src="./src/lib/Vector.js"></script>
+  <script src="./src/js/Flock.js"></script>
   <script src="./src/js/agent.js"></script>
   <script src="./src/js/otherAgents.js"></script>
   <script src="./src/js/globals.js"></script>

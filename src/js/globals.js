@@ -47,17 +47,25 @@ function addItem(list, max, xx, yy) {
 }
 
 
-function renderItem(list, color, radius) {
+function renderItem(list, color, radius, rect) {
   for (let i = 0; i < list.length; i++) {
     ctx.beginPath();
     ctx.fillStyle = color;
-    // ctx.fillRect(list[i].pos.x, list[i].pos.y, radius*2, radius*2);
-    ctx.arc(list[i].pos.x, list[i].pos.y, (radius || 5), 0, Math.PI * 2);
+    if (rect) {
+      ctx.fillRect(list[i].pos.x, list[i].pos.y, radius*2, radius*2);
+    } else {
+      ctx.arc(list[i].pos.x, list[i].pos.y, (radius || 5), 0, Math.PI * 2);
+    }
     ctx.fill();
     ctx.closePath();
   }
 }
 
+let flk_slider_separate = document.getElementById('separate');
+let flk_slider_align = document.getElementById('align');
+let flk_slider_cohesion = document.getElementById('cohesion');
+let renderhealth_checkbox = document.getElementById('render_health');
+let debug_checkbox = document.getElementById('debug');
 
 /**
  * @method batchUpdateAgents()
@@ -70,16 +78,17 @@ function renderItem(list, color, radius) {
  * and also checks for dead state
  */
 function batchUpdateAgents(list, like, dislike, weight, callback) {
-  for (let i = list.length-1; i >= 0; i--) {  
-    list[i].flock(list);
+  for (let i = list.length-1; i >= 0; i--) {
+    list[i].updateFlockBehavior(flk_slider_separate.value, flk_slider_align.value, flk_slider_cohesion.value);
+    list[i].applyFlock(list);
     list[i].Behavior(like, dislike, weight);
     list[i].boundaries();
     list[i].update();
     list[i].render(ctx);
 
     // DEBUG
-    if (document.getElementById('render_health').checked) list[i].renderHealth(ctx);
-    if (document.getElementById('debug').checked) list[i].renderDebug(ctx)
+    if (renderhealth_checkbox.checked) list[i].renderHealth(ctx);
+    if (debug_checkbox.checked) list[i].renderDebug(ctx)
     
     if(callback) {
       callback.call(null,list,i);
@@ -112,7 +121,10 @@ function renderStats(data) {
 
 
 /** UTILS */
-function random(min, max) { return min+Math.random()*max }
+function random(min, max) {
+  if (max === undefined) return Math.random()*min;
+  return min+Math.random()*max
+}
 function clamp(min, max, value) {
   if(value > max) {
     return value;
