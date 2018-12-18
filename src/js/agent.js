@@ -1,5 +1,12 @@
 // controls mutation rate
 const mutationRate = 0.5;
+const AGENT_TYPE = {
+  MALE : 'MALE',
+  FEMALE : 'FEMALE',
+  PREDATOR : 'PREDATOR',
+  AVOIDER : 'AVOIDER',
+  EATER : 'EATER'
+}
 
 /**
  * @class Agent
@@ -39,8 +46,17 @@ class Agent {
 
     
 
-    this.sex = (Math.random() < 0.5) ? 'male' : 'female';
-    this.maxRadius = (this.sex === 'male') ? 15 : 10;
+    this.sex = (Math.random() < 0.5) ? AGENT_TYPE.MALE : AGENT_TYPE.FEMALE;
+    if (this.sex === AGENT_TYPE.MALE) {
+      this.color = [0, 170, 0];
+    }
+    if (this.sex === AGENT_TYPE.FEMALE) {
+      this.color = [255, 39, 201];
+    }
+
+    this.maxRadius = (this.sex === AGENT_TYPE.FEMALE) ? 15 : 10;
+
+
     this.dna = [];
     this.mutate = function (index, mr, value) {
       if (Math.random() < mr) {
@@ -67,17 +83,35 @@ class Agent {
       this.mutate(2, mutationRate, [-10, 20]);
       this.mutate(3, mutationRate, [-10, 20]);
     }
-    // if(this.sex === 'male' || this.sex === 'female') {
-    //   console.log('food :' + this.dna[0] + '| poison : ' + this.dna[1])
-    // }
-
     
-    let names_female = ['hanna', 'mona', 'kim', 'sweet', 'sofia', 'rose', 'laisy', 'daisy', 'mia'];
-    let names_male = ['joe', 'jim', 'kim', 'keo', 'shaun', 'morgan', 'jery', 'tom', 'anu', 'brian', 'ninja'];
-    if (this.sex === 'female') {
+    let names_female = [
+      'hanna',
+      'mona',
+      'kim',
+      'sweet',
+      'sofia',
+      'rose',
+      'laisy',
+      'daisy',
+      'mia'
+    ];
+    let names_male = [
+      'joe',
+      'jim',
+      'kim',
+      'keo',
+      'shaun',
+      'morgan',
+      'jery',
+      'tom',
+      'anu',
+      'brian',
+      'ninja'
+    ];
+    if (this.sex === AGENT_TYPE.MALE) {
       this.name = names_female[Math.floor(random(0, names_female.length - 1))];
     }
-    else if (this.sex === 'male') {
+    else if (this.sex === AGENT_TYPE.FEMALE) {
       this.name = names_male[Math.floor(random(0, names_male.length - 1))];
     }
   }
@@ -292,7 +326,7 @@ class Agent {
         // get the distance
         let d = dist(agentA.pos.x, agentA.pos.y, agentB.pos.x, agentB.pos.y);
         if (d < (agentB.radius + agentA.radius)) {
-          if ((agentA.radius > 8 && agentB.radius > 8)) {
+          if ((agentA.radius > 8 && agentB.radius > 8) && agentA.sex !== agentB.sex) {
             let x = agentB.pos.x + random(agentB.vel.x, agentA.vel.x);
             let y = agentB.pos.y + random(agentB.vel.y, agentA.vel.y);
             list.push(new Agent(x, y, 5, this.dna));
@@ -326,37 +360,23 @@ class Agent {
     ctx.stroke();
     ctx.closePath();
   }
-      
+  
+  renderNames(ctx) {
+    ctx.beginPath();
+    ctx.fillStyle = 'white';
+    ctx.fillText(this.name, this.pos.x - this.radius, this.pos.y - this.radius - 5);
+    ctx.fill();
+    ctx.closePath();
+  }
 
   /**
    * Render Agent
    * @param {CanvasRenderingContext2D} ctx
    */
   render(ctx) {
-
     ctx.beginPath();
 
-    if (document.getElementById('names').checked) {
-      ctx.fillStyle = 'white';
-      ctx.fillText(this.name, this.pos.x - this.radius, this.pos.y - this.radius - 5);
-      ctx.fill();
-    }
-
-    if (this.sex === 'male') {
-      ctx.fillStyle = rgba(0, 170, 0, this.health);
-    }
-    else if (this.sex === 'female') {
-      ctx.fillStyle = rgba(255, 39, 201, this.health);
-    }
-    else if (this.sex === 'predator') {
-      ctx.fillStyle = rgba(255, 0, 0, this.health);
-    }
-    else if (this.sex === 'avoider') {
-      ctx.fillStyle = rgba(255, 165, 0, this.health);
-    } else if (this.sex === 'eater') {
-      // rgb(0, 191, 255)
-      ctx.fillStyle = rgba(0, 191, 255, this.health);
-    }
+    ctx.fillStyle = rgba.call(null, this.color[0], this.color[1], this.color[2], this.health);
 
     let angle = this.vel.heading() + Math.PI / 180;
     ctx.save();

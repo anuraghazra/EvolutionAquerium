@@ -66,6 +66,7 @@ let flk_slider_align = document.getElementById('align');
 let flk_slider_cohesion = document.getElementById('cohesion');
 let renderhealth_checkbox = document.getElementById('render_health');
 let debug_checkbox = document.getElementById('debug');
+let render_names = document.getElementById('names');
 
 /**
  * @method batchUpdateAgents()
@@ -88,7 +89,8 @@ function batchUpdateAgents(list, like, dislike, weight, callback) {
 
     // DEBUG
     if (renderhealth_checkbox.checked) list[i].renderHealth(ctx);
-    if (debug_checkbox.checked) list[i].renderDebug(ctx)
+    if (debug_checkbox.checked) list[i].renderDebug(ctx);
+    if (render_names.checked) list[i].renderNames(ctx);
     
     if(callback) {
       callback.call(null,list,i);
