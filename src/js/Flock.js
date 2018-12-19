@@ -22,6 +22,18 @@ class Flock {
     return steer;
   }
 
+  /**
+   * just a basic refator
+   * @param {*} sum 
+   */
+  _returnSteer(sum) {
+    sum.normalize();
+    sum.mult(this.currentAgent.maxSpeed);
+    let steer = Vector.sub(sum, this.currentAgent.vel);
+    steer.limit(this.currentAgent.maxForce);
+    return steer;
+  }
+
 
   /**
    * @method separate()
@@ -44,15 +56,9 @@ class Flock {
     }
     if (count > 0) {
       sum.div(count);
-      sum.normalize();
-      sum.mult(this.currentAgent.maxSpeed);
-      let steer = Vector.sub(sum, this.currentAgent.vel);
-      steer.limit(this.currentAgent.maxForce);
-      return steer;
+      return this._returnSteer(sum);
     }
-    else {
-      return new Vector(0, 0);
-    }
+    return new Vector(0, 0);
   };
 
   /**
@@ -73,15 +79,9 @@ class Flock {
     }
     if (count > 0) {
       sum.div(count);
-      sum.normalize();
-      sum.mult(this.currentAgent.maxSpeed);
-      let steer = Vector.sub(sum, this.currentAgent.vel);
-      steer.limit(this.currentAgent.maxForce);
-      return steer;
+      return this._returnSteer(sum);
     }
-    else {
-      return new Vector(0, 0);
-    }
+    return new Vector(0, 0);
   }
 
 
@@ -104,14 +104,8 @@ class Flock {
     if (count > 0) {
       sum.div(count);
       sum.sub(this.currentAgent.pos);
-      sum.normalize();
-      sum.mult(this.currentAgent.maxSpeed);
-      let steer = Vector.sub(sum, this.currentAgent.vel);
-      steer.limit(this.currentAgent.maxForce);
-      return steer;
+      return this._returnSteer(sum);
     }
-    else {
-      return new Vector(0, 0);
-    }
+    return new Vector(0, 0);
   }
 }

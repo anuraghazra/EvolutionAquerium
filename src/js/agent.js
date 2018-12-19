@@ -24,8 +24,7 @@ class Agent {
     this.pos = new Vector(x, y);
     this.acc = new Vector(0, 0);
     this.vel = new Vector(0, -2);
-    this.canvasWidth = width;
-    this.canvasHeight = height;
+
     this.radius = radius;
     this.maxSpeed = 1.5;
     this.maxForce = 0.05;
@@ -33,6 +32,14 @@ class Agent {
     this.healthDecrease = 0.003;
     this.goodFoodMultiplier = 0.5;
     this.badFoodMultiplier = -0.4;
+    this.color = color || [0, 170, 0];
+
+    this.sex = (random(1) < 0.5) ? AGENT_TYPE.MALE : AGENT_TYPE.FEMALE;
+    if (this.sex === AGENT_TYPE.MALE) this.color = [0, 170, 0];
+    if (this.sex === AGENT_TYPE.FEMALE) this.color = [255, 39, 201];
+
+    this.maxRadius = (this.sex === AGENT_TYPE.FEMALE) ? 15 : 10;
+
     this.flock = new Flock(this);
 
     /**
@@ -44,22 +51,9 @@ class Agent {
       cohesion: 0.7
     };
 
-    
-
-    this.sex = (Math.random() < 0.5) ? AGENT_TYPE.MALE : AGENT_TYPE.FEMALE;
-    if (this.sex === AGENT_TYPE.MALE) {
-      this.color = [0, 170, 0];
-    }
-    if (this.sex === AGENT_TYPE.FEMALE) {
-      this.color = [255, 39, 201];
-    }
-
-    this.maxRadius = (this.sex === AGENT_TYPE.FEMALE) ? 15 : 10;
-
-
     this.dna = [];
     this.mutate = function (index, mr, value) {
-      if (Math.random() < mr) {
+      if (random(1) < mr) {
         this.dna[index] += random(value[0], value[1]);
       }
     };
@@ -126,10 +120,8 @@ class Agent {
     this.pos.add(this.vel);
     this.acc.mult(0);
     this.health -= this.healthDecrease;
-    if (this.health > 1) {
-      this.health = 1;
-    }
-    if(this.radius > this.maxRadius) {this.radius = this.maxRadius}
+    this.health = clamp(this.health, 0, 1);
+    this.radius = clamp(this.radius, 0, this.maxRadius);
   }
   
   /**
@@ -144,7 +136,7 @@ class Agent {
    * return agent's is dead status
    */
   dead () {
-    return (this.health < 0);
+    return (this.health <= 0);
   }
 
   /**
@@ -157,13 +149,13 @@ class Agent {
     if (this.pos.x < d) {
       desire = new Vector(this.maxSpeed, this.vel.y);
     }
-    else if (this.pos.x > width - d) {
+    else if (this.pos.x > WIDTH - d) {
       desire = new Vector(-this.maxSpeed, this.vel.y);
     }
     if (this.pos.y < d) {
       desire = new Vector(this.vel.x, this.maxSpeed);
     }
-    else if (this.pos.y > height - d) {
+    else if (this.pos.y > HEIGHT - d) {
       desire = new Vector(this.vel.x, -this.maxSpeed);
     }
     if (desire !== null) {
@@ -351,12 +343,12 @@ class Agent {
   renderDebug(ctx) {
     ctx.beginPath();
     ctx.strokeStyle = 'green';
-    ctx.arc(this.pos.x, this.pos.y, clamp(0, 100, this.dna[2]), 0, Math.PI * 2);
+    ctx.arc(this.pos.x, this.pos.y, clamp(this.dna[2], 0, 100), 0, Math.PI * 2);
     ctx.stroke();
     ctx.closePath();
     ctx.beginPath();
     ctx.strokeStyle = 'red';
-    ctx.arc(this.pos.x, this.pos.y, clamp(0, 100, this.dna[3]), 0, Math.PI * 2);
+    ctx.arc(this.pos.x, this.pos.y, clamp(this.dna[3], 0, 100), 0, Math.PI * 2);
     ctx.stroke();
     ctx.closePath();
   }
