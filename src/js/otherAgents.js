@@ -24,8 +24,6 @@ class Predator extends Agent {
     this.dna[1] = -5;
     this.dna[2] = random(0, 100);
     this.dna[3] = random(0, 100);
-    
-    console.log(this.dna)
   }
 }
 

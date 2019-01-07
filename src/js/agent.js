@@ -1,11 +1,11 @@
 // controls mutation rate
 const mutationRate = 0.5;
 const AGENT_TYPE = {
-  MALE : 'MALE',
-  FEMALE : 'FEMALE',
-  PREDATOR : 'PREDATOR',
-  AVOIDER : 'AVOIDER',
-  EATER : 'EATER'
+  MALE: 'MALE',
+  FEMALE: 'FEMALE',
+  PREDATOR: 'PREDATOR',
+  AVOIDER: 'AVOIDER',
+  EATER: 'EATER'
 }
 
 /**
@@ -77,7 +77,7 @@ class Agent {
       this.mutate(2, mutationRate, [-10, 20]);
       this.mutate(3, mutationRate, [-10, 20]);
     }
-    
+
     let names_female = [
       'hanna',
       'mona',
@@ -123,19 +123,19 @@ class Agent {
     this.health = clamp(this.health, 0, 1);
     this.radius = clamp(this.radius, 0, this.maxRadius);
   }
-  
+
   /**
    * @method applyForce()
    * @param {Number} f 
    * applies force to acceleration
    */
-  applyForce (f) { this.acc.add(f) }
+  applyForce(f) { this.acc.add(f) }
 
   /**
    * @method dead()
    * return agent's is dead status
    */
-  dead () {
+  dead() {
     return (this.health <= 0);
   }
 
@@ -143,7 +143,7 @@ class Agent {
    * @method boundaries()
    * check boundaries and limit agents within screen
    */
-  boundaries () {
+  boundaries() {
     let d = 50;
     let desire = null;
     if (this.pos.x < d) {
@@ -176,7 +176,7 @@ class Agent {
    * @param {Function} callback
    * a robust function to define fear which also can be used inversly 
    */
-  defineFear (list, weight, perception, callback) {
+  defineFear(list, weight, perception, callback) {
     let record = Infinity;
     let close = null;
     for (let i = list.length - 1; i >= 0; i--) {
@@ -207,7 +207,7 @@ class Agent {
    * @param {*} weights 
    * food and poison handling 
    */
-  Behavior (good, bad, weights) {
+  Behavior(good, bad, weights) {
     let goodFood = this.eat(good, this.goodFoodMultiplier, this.dna[2]);
     let badFood = this.eat(bad, this.badFoodMultiplier, this.dna[3]);
     if (!weights) {
@@ -227,7 +227,7 @@ class Agent {
    * @param {*} agents 
    * calculates all the flocking code apply it to the acceleration
    */
-  applyFlock (agents) {
+  applyFlock(agents) {
     let sep = this.flock.separate(agents);
     let ali = this.flock.align(agents);
     let coh = this.flock.cohesion(agents);
@@ -260,7 +260,7 @@ class Agent {
    * @param {Number} perception 
    * seeks the food and poison
    */
-  eat (list, nutri, perception) {
+  eat(list, nutri, perception) {
     let record = Infinity;
     let close = null;
     for (let i = list.length - 1; i >= 0; i--) {
@@ -293,14 +293,14 @@ class Agent {
    * @param {FLoat} probability 
    * randomly returns a new Agent
    */
-  clone (probability) {
+  clone(probability) {
     if (Math.random() < probability) {
       return new Agent(this.pos.x, this.pos.y, 5, this.dna);
     }
     return null;
   }
 
-  
+
   /**
    * @method reproduce()
    * @param {Array} list
@@ -309,7 +309,7 @@ class Agent {
    * checks male and female agents and starts Reproduction
    * if they are close enough 
    */
-  reproduce (list, callback) {
+  reproduce(list, callback) {
     let d = Infinity;
     for (let i = 0; i < list.length - 1; i++) {
       let agentA = list[i];
@@ -333,26 +333,26 @@ class Agent {
   renderHealth(ctx) {
     ctx.save();
     ctx.fillStyle = 'white';
-    ctx.fillRect(this.pos.x-10, this.pos.y-10, this.health*20, 3);
+    ctx.fillRect(this.pos.x - 10, this.pos.y - 10, this.health * 20, 3);
     ctx.lineWidth = 0.3;
     ctx.strokeStyle = 'white';
-    ctx.strokeRect(this.pos.x-10, this.pos.y-10, 1*20, 2);
+    ctx.strokeRect(this.pos.x - 10, this.pos.y - 10, 1 * 20, 2);
     ctx.restore();
   }
 
   renderDebug(ctx) {
     ctx.beginPath();
     ctx.strokeStyle = 'green';
-    ctx.arc(this.pos.x, this.pos.y, clamp(this.dna[2], 0, 100), 0, Math.PI * 2);
+    ctx.arc(this.pos.x, this.pos.y, clamp(this.dna[2], 0, 100), 0, TWO_PI);
     ctx.stroke();
     ctx.closePath();
     ctx.beginPath();
     ctx.strokeStyle = 'red';
-    ctx.arc(this.pos.x, this.pos.y, clamp(this.dna[3], 0, 100), 0, Math.PI * 2);
+    ctx.arc(this.pos.x, this.pos.y, clamp(this.dna[3], 0, 100), 0, TWO_PI);
     ctx.stroke();
     ctx.closePath();
   }
-  
+
   renderNames(ctx) {
     ctx.beginPath();
     ctx.fillStyle = 'white';
@@ -368,9 +368,9 @@ class Agent {
   render(ctx) {
     ctx.beginPath();
 
-    ctx.fillStyle = rgba.call(null, this.color[0], this.color[1], this.color[2], this.health);
+    ctx.fillStyle = `rgba(${this.color[0]},${this.color[1]},${this.color[2]},${this.health})`;
+    let angle = this.vel.heading();
 
-    let angle = this.vel.heading() + Math.PI / 180;
     ctx.save();
     ctx.translate(this.pos.x, this.pos.y);
     ctx.rotate(angle);

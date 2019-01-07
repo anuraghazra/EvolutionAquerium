@@ -159,16 +159,6 @@ window.onload = function () {
     // render items
     renderItem(food, 'white', 1, true);
     renderItem(poison, 'crimson', 2);
-
-    renderStats({
-      'Good Creatures': creatures.length,
-      'Predators': predators.length,
-      'Avoiders': avoiders.length,
-      'Eaters': eaters.length,
-      'Foods': food.length,
-      'Poison': poison.length,
-      'FPS' : fps
-    })
     
     requestAnimationFrame(animate);
     if(!lastframe) {
@@ -181,5 +171,17 @@ window.onload = function () {
     fps = (1/delta).toFixed(2);
   }
   animate();
+
+  window.setInterval(function() {
+    renderStats({
+      'Good Creatures': creatures.length,
+      'Predators': predators.length,
+      'Avoiders': avoiders.length,
+      'Eaters': eaters.length,
+      'Foods': food.length,
+      'Poison': poison.length,
+      'FPS' : fps
+    })
+  }, 100);
 
 }

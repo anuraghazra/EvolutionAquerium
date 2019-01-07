@@ -54,7 +54,8 @@ function renderItem(list, color, radius, rect) {
     if (rect) {
       ctx.fillRect(list[i].pos.x, list[i].pos.y, radius * 2, radius * 2);
     } else {
-      ctx.arc(list[i].pos.x, list[i].pos.y, (radius || 5), 0, Math.PI * 2);
+      // ctx.arc(list[i].pos.x, list[i].pos.y, (radius || 5), 0, Math.PI * 2);      
+      ctx.fillRect(list[i].pos.x, list[i].pos.y, radius*2, radius*2);
     }
     ctx.fill();
     ctx.closePath();
@@ -110,15 +111,17 @@ function batchUpdateAgents(list, foodPoison, weight, callback) {
  * @metod renderStats()
  * @param {*} data 
  */
+let stats = document.getElementById('stats');
 function renderStats(data) {
   renderData = '';
   for (let i in data) {
     renderData += ' | ' + i + ' : ' + data[i]
   }
-  ctx.fillStyle = 'white';
-  ctx.font = '13px Arial';
-  ctx.fillText(renderData, 10, 20);
-  ctx.fill();
+  // ctx.fillStyle = 'white';
+  // ctx.font = '13px Arial';
+  // ctx.fillText(renderData, 10, 20);
+  // ctx.fill();
+  stats.textContent = renderData;
 }
 
 
@@ -141,6 +144,7 @@ function dist(px, py, qx, qy) {
   let dy = py - qy;
   return Math.sqrt(dx * dx + dy * dy);
 }
-function rgba(r, g, b, a) {
-  return `rgba(${r},${g},${b},${a})`;
-}
+const TWO_PI = Math.PI * 2;
+// function rgba(r, g, b, a) {
+//   return `rgba(${r},${g},${b},${a})`;
+// }

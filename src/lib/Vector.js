@@ -14,6 +14,11 @@ function Vector(x, y) {
 Vector.dist = function (v1, v2) {
   return v1.dist(v2);
 }
+Vector.distSq = function (v1, v2) {
+  let dx = v2.x - v1.x;
+  let dy = v2.y - v1.y;
+  return (dx * dx + dy * dy);
+}
 Vector.sub = function (v1, v2) {
   return new Vector(v1.x - v2.x, v1.y - v2.y);
 };
