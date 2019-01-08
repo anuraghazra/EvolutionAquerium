@@ -6,14 +6,14 @@ canvas.width = WIDTH;
 canvas.height = HEIGHT;
 
 let ctx = canvas.getContext('2d');
-// let walls = [];
 
 let MAX_CREATURES = 300;
 const REPRODUCTION_RATE = 0.004;
-const CONFIG = {
 
-}
-
+// let walls = [];
+// walls.push(new Wall(200, 200, 20, 250));
+// walls.push(new Wall(800, 200, 20, 250));
+// walls.push(new Wall(400, 250, 250, 20));
 window.onload = function () {
   if (typeof window.orientation !== 'undefined') { MAX_CREATURES = 200 }
 
@@ -24,9 +24,6 @@ window.onload = function () {
   let food = [];
   let poison = [];
 
-  // walls.push(new Wall(200, 200, 20, 250));
-  // walls.push(new Wall(800, 200, 20, 250));
-  // walls.push(new Wall(400, 250, 250, 20));
 
   const INIT_VALUES = {
     food: random(50, 100),
@@ -79,17 +76,18 @@ window.onload = function () {
   setup();
 
 
+  const ecoSys = new EcoSystem({
+    'CREATURE': creatures,
+    'PREDATOR': predators,
+    'AVOIDER': avoiders,
+    'EATER': eaters,
+    'FOOD': food,
+    'POISON': poison
+  })
+
+
   var lastframe;
   var fps;
-
-  // const ecoSys = new EcoSystem()
-  // ecoSys.add('CREATURE', creatures);
-  // ecoSys.add('PREDATOR', predators);
-  // ecoSys.add('AVOIDER', avoiders);
-  // ecoSys.add('EATER', eaters);
-  // ecoSys.add('FOOD', food)
-  // ecoSys.add('POISON', poison)
-
 
   //  ANIMATE LOOP
   function animate() {
@@ -97,120 +95,89 @@ window.onload = function () {
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
 
-    // ecoSys.addBehavior({
-    //   name: 'CREATURE',
-    //   like: 'FOOD',
-    //   dislike: 'POISON',
-    //   fear: {
-    //     'PREDATOR': [-4, 50],
-    //     'EATER': [-2, 100]
-    //   },
-    //   cloneItSelf: 0.0015,
-    //   callback: function (agent) {
-    //     if (
-    //       creatures.length > 0 &&
-    //       random(1) < REPRODUCTION_RATE
-    //       && creatures.length < MAX_CREATURES
-    //     ) {
-    //       agent.reproduce(creatures);
-    //     }
-    //   }
-    // });
-    // ecoSys.addBehavior({
-    //   name: 'PREDATOR',
-    //   like: 'POISON',
-    //   dislike: 'FOOD',
-    //   likeDislikeWeight : [1, -1],
-    //   fear: {
-    //     'EATER': [-10, 50]
-    //   },
-    //   cloneItSelf: 0.0015,
-    //   callback: function (agent) {
-    //     if (
-    //       creatures.length > 0 &&
-    //       random(1) < REPRODUCTION_RATE
-    //       && creatures.length < MAX_CREATURES
-    //     ) {
-    //       agent.reproduce(creatures);
-    //     }
-    //   }
-    // });
-
-
-    // ecoSys.update();
-    // ecoSys.render();
-
-
-    
-    // Creatures
-    batchUpdateAgents(creatures, [food, poison], undefined, function (list, i) {
-      let me = list[i];
-      let child = list[i].clone(0.0015);
-      if (child !== null) {
-        list.push(child);
-      }
-
-      me.defineFear(predators, -4, 50);
-      me.defineFear(eaters, -2, 100);
-
-      if (creatures.length > 0 && random(1) < REPRODUCTION_RATE && creatures.length < MAX_CREATURES) {
-        me.reproduce(creatures);
+    ecoSys.addBehavior({
+      name: 'CREATURE',
+      like: 'FOOD',
+      dislike: 'POISON',
+      fear: {
+        'PREDATOR': [-4, 75],
+        'EATER': [-2, 100]
+      },
+      cloneItSelf: 0.0015,
+      callback: function () {
+        if (
+          creatures.length > 0 &&
+          random(1) < REPRODUCTION_RATE
+          && creatures.length < MAX_CREATURES
+        ) {
+          this.reproduce(creatures);
+        }
       }
     });
 
-    // Predators
-    batchUpdateAgents(predators, [poison, food], undefined, function (list, i) {
-      let me = list[i];
-      me.defineFear(creatures, 1, 200, function (list, i) {
-        list.splice(i, 1);
-        me.health += me.goodFoodMultiplier;
-        me.radius += me.goodFoodMultiplier;
-      })
-      me.defineFear(eaters, -10, 50);
+    ecoSys.addBehavior({
+      name: 'PREDATOR',
+      like: 'POISON',
+      dislike: 'FOOD',
+      likeDislikeWeight: [1, -1],
+      fear: {
+        'EATER': [-10, 50],
+        'CREATURE': [1, 200, function (agents, i) {
+          agents.splice(i, 1);
+          this.health += this.goodFoodMultiplier;
+          this.radius += this.goodFoodMultiplier;
+        }]
+      },
     });
 
-    // Avoiders
-    batchUpdateAgents(avoiders, [food, poison], [1, -1], function (list, i) {
-      let me = list[i];
-      me.defineFear(creatures, -0.9, 100);
-      me.defineFear(eaters, -2, 100);
-      me.defineFear(predators, -2, 100, function () {
-        me.health += me.badFoodMultiplier;
-      })
+    ecoSys.addBehavior({
+      name: 'AVOIDER',
+      like: 'FOOD',
+      dislike: 'POISON',
+      // likeDislikeWeight: [1, -1],
+      fear: {
+        'CREATURE': [-0.9, 100],
+        'EATER': [-2, 100],
+        'PREDATOR': [-5, 100, function () {
+          this.health += this.badFoodMultiplier;
+        }]
+      },
     });
 
-
-    // Eaters
-    batchUpdateAgents(eaters, [poison, poison], [1, 1], function (list, i) {
-      let me = list[i];
-      if (random(0, 1) < 0.05) {
-        addItem(food, 1, me.pos.x, me.pos.y)
+    ecoSys.addBehavior({
+      name: 'EATER',
+      like: 'POISON',
+      dislike: 'POISON',
+      likeDislikeWeight: [1, -1],
+      fear: {
+        'CREATURE': [1.0, 100, function (list, i) {
+          list.splice(i, 1);
+          this.health += this.goodFoodMultiplier;
+          this.radius += this.goodFoodMultiplier;
+        }],
+        'PREDATOR': [1.0, 100, function (list, i) {
+          list.splice(i, 1);
+          this.health += this.goodFoodMultiplier;
+          this.radius += this.goodFoodMultiplier;
+        }],
+        'AVOIDER': [1.0, 100, function (list, i) {
+          list.splice(i, 1);
+          this.health += this.goodFoodMultiplier;
+          this.radius += this.goodFoodMultiplier;
+        }],
+      },
+      callback: function () {
+        if (random(0, 1) < 0.05) {
+          addItem(food, 1, this.pos.x, this.pos.y)
+        }
       }
-
-      me.defineFear(creatures, 1.0, 100, function (list, i) {
-        list.splice(i, 1);
-        me.health += me.goodFoodMultiplier;
-        me.radius += me.goodFoodMultiplier;
-      })
-      me.defineFear(predators, 1.0, 100, function (list, i) {
-        list.splice(i, 1);
-        me.health += me.goodFoodMultiplier;
-        me.radius += me.goodFoodMultiplier;
-      })
-      me.defineFear(avoiders, 1.0, 100, function (list, i) {
-        list.splice(i, 1);
-        me.health += me.goodFoodMultiplier;
-        me.radius += me.goodFoodMultiplier;
-      })
     });
+
 
     // RENDER
     renderItem(food, 'white', 1, true);
     renderItem(poison, 'crimson', 2);
-    batchRenderAgents(creatures);
-    batchRenderAgents(predators);
-    batchRenderAgents(avoiders);
-    batchRenderAgents(eaters);
+    ecoSys.render();
 
 
     // Add And Reset
@@ -219,9 +186,9 @@ window.onload = function () {
     if (random(1) < 0.005) addPredators(predators, 1);
     if (random(1) < 0.005) addAvoiders(avoiders, 1);
     if (creatures.length < 50) addCreatures(creatures, 50);
-    if (creatures.length > MAX_CREATURES) creatures.shift();
     if (food.length < 50) addItem(food, 20);
     if (eaters.length < 1) addEaters(eaters, 1);
+    if (creatures.length > MAX_CREATURES) creatures.shift();
 
 
     // WALLS

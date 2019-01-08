@@ -183,7 +183,7 @@ class Agent {
       let d = dist(this.pos.x, this.pos.y, list[i].pos.x, list[i].pos.y);
       if (d < this.radius) {
         if (callback) {
-          callback.call(null, list, i);
+          callback.call(this, list, i);
         }
       }
       else {

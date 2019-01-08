@@ -120,7 +120,7 @@ function batchUpdateAgents(list, foodPoison, weight, callback) {
     list[i].update();
 
     if (callback) {
-      callback.call(null, list, i);
+      callback.call(list[i], list, i);
     }
 
     if (list[i].dead()) {
