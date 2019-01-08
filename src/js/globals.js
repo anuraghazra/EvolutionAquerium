@@ -7,6 +7,10 @@ function addCreatures(list, max) {
     let x = random(WIDTH);
     let y = random(HEIGHT);
     let radius = random(5, 7);
+    if (isInsideWall(x, y, radius)) {
+      x = random(WIDTH);
+      y = random(HEIGHT);
+    }
     list.push(new Agent(x, y, radius));
   }
 }
@@ -15,6 +19,10 @@ function addPredators(list, max) {
     let x = random(WIDTH);
     let y = random(HEIGHT);
     let radius = random(6, 10);
+    if (isInsideWall(x, y, radius)) {
+      x = random(WIDTH);
+      y = random(HEIGHT);
+    }
     list.push(new Predator(x, y, radius));
   }
 }
@@ -23,6 +31,10 @@ function addAvoiders(list, max) {
     let x = random(WIDTH);
     let y = random(HEIGHT);
     let radius = random(3, 8);
+    if (isInsideWall(x, y, radius)) {
+      x = random(WIDTH);
+      y = random(HEIGHT);
+    }
     list.push(new Avoider(x, y, radius));
   }
 }
@@ -31,6 +43,10 @@ function addEaters(list, max) {
     let x = random(WIDTH);
     let y = random(HEIGHT);
     let radius = random(3, 8);
+    if (isInsideWall(x, y, radius)) {
+      x = random(WIDTH);
+      y = random(HEIGHT);
+    }
     list.push(new Eater(x, y, radius));
   }
 }
@@ -41,11 +57,27 @@ function addItem(list, max, xx, yy) {
     if (x == undefined && y == undefined) {
       x = random(WIDTH);
       y = random(HEIGHT);
+      if (isInsideWall(x, y, 0)) {
+        x = random(WIDTH);
+        y = random(HEIGHT);
+      }
     }
     list.push({ pos: new Vector(x, y) });
   }
 }
 
+function isInsideWall(x, y, padding) {
+  if (typeof walls === 'undefined') { return false } 
+  for (let w = 0; w < walls.length; w++) {
+    let wall = walls[w];
+    if (
+      (x + padding >= wall.x && x - padding <= wall.x + wall.width) &&
+      (y + padding >= wall.y && y - padding <= wall.y + wall.height)) {
+      return true;
+    }
+  }
+  return false;
+}
 
 function renderItem(list, color, radius, rect) {
   for (let i = 0; i < list.length; i++) {
@@ -55,7 +87,7 @@ function renderItem(list, color, radius, rect) {
       ctx.fillRect(list[i].pos.x, list[i].pos.y, radius * 2, radius * 2);
     } else {
       // ctx.arc(list[i].pos.x, list[i].pos.y, (radius || 5), 0, Math.PI * 2);      
-      ctx.fillRect(list[i].pos.x, list[i].pos.y, radius*2, radius*2);
+      ctx.fillRect(list[i].pos.x, list[i].pos.y, radius * 2, radius * 2);
     }
     ctx.fill();
     ctx.closePath();
@@ -86,12 +118,6 @@ function batchUpdateAgents(list, foodPoison, weight, callback) {
     list[i].Behavior(foodPoison[0], foodPoison[1], weight);
     list[i].boundaries();
     list[i].update();
-    list[i].render(ctx);
-
-    // DEBUG
-    if (renderhealth_checkbox.checked) list[i].renderHealth(ctx);
-    if (debug_checkbox.checked) list[i].renderDebug(ctx);
-    if (render_names.checked) list[i].renderNames(ctx);
 
     if (callback) {
       callback.call(null, list, i);
@@ -103,6 +129,17 @@ function batchUpdateAgents(list, foodPoison, weight, callback) {
       foodPoison[0].push({ pos: new Vector(x, y) });
       list.splice(i, 1);
     }
+  }
+}
+
+function batchRenderAgents(list) {
+  for (let i = 0; i < list.length; i++) {
+    list[i].render(ctx);
+
+    // DEBUG
+    if (renderhealth_checkbox.checked) list[i].renderHealth(ctx);
+    if (debug_checkbox.checked) list[i].renderDebug(ctx);
+    if (render_names.checked) list[i].renderNames(ctx);
   }
 }
 
