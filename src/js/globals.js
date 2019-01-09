@@ -99,38 +99,9 @@ let flk_slider_align = document.getElementById('align');
 let flk_slider_cohesion = document.getElementById('cohesion');
 let renderhealth_checkbox = document.getElementById('render_health');
 let debug_checkbox = document.getElementById('debug');
+let dnadebug_checkbox = document.getElementById('dnadebug');
 let render_names = document.getElementById('names');
 
-/**
- * @method batchUpdateAgents()
- * @param {Array} list 
- * @param {Array} like 
- * @param {Array} dislike 
- * @param {2DArray} weight 
- * @param {Function} callback 
- * updates the flocking, behavior, boundaries, and renders all the agents
- * and also checks for dead state
- */
-function batchUpdateAgents(list, foodPoison, weight, callback) {
-  for (let i = list.length - 1; i >= 0; i--) {
-    list[i].updateFlockBehavior(flk_slider_separate.value, flk_slider_align.value, flk_slider_cohesion.value);
-    list[i].applyFlock(list);
-    list[i].Behavior(foodPoison[0], foodPoison[1], weight);
-    list[i].boundaries();
-    list[i].update();
-
-    if (callback) {
-      callback.call(list[i], list, i);
-    }
-
-    if (list[i].dead()) {
-      let x = list[i].pos.x;
-      let y = list[i].pos.y;
-      foodPoison[0].push({ pos: new Vector(x, y) });
-      list.splice(i, 1);
-    }
-  }
-}
 
 function batchRenderAgents(list) {
   for (let i = 0; i < list.length; i++) {
@@ -139,6 +110,7 @@ function batchRenderAgents(list) {
     // DEBUG
     if (renderhealth_checkbox.checked) list[i].renderHealth(ctx);
     if (debug_checkbox.checked) list[i].renderDebug(ctx);
+    if (dnadebug_checkbox.checked) list[i].renderDebugDNA(ctx);
     if (render_names.checked) list[i].renderNames(ctx);
   }
 }
@@ -154,10 +126,7 @@ function renderStats(data) {
   for (let i in data) {
     renderData += ' | ' + i + ' : ' + data[i]
   }
-  // ctx.fillStyle = 'white';
-  // ctx.font = '13px Arial';
-  // ctx.fillText(renderData, 10, 20);
-  // ctx.fill();
+
   stats.textContent = renderData;
 }
 

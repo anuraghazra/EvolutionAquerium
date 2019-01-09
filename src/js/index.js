@@ -28,23 +28,21 @@ window.onload = function () {
   const INIT_VALUES = {
     food: random(50, 100),
     poison: random(50, 20),
-    creatures: random(50, 100),
+    creatures: random(100, 150),
     predators: random(2, 10),
     avoiders: random(20, 25),
     eaters: random(1, 4)
   }
 
-
   // === ADD ITEMS
   function setup() {
+
     addItem(food, INIT_VALUES.food);
     addItem(poison, INIT_VALUES.poison);
-    addCreatures(creatures, INIT_VALUES.creatures);
-    addPredators(predators, INIT_VALUES.predators);
-    addAvoiders(avoiders, INIT_VALUES.avoiders);
-    addEaters(eaters, INIT_VALUES.eaters);
-
-
+    // addCreatures(creatures, INIT_VALUES.creatures);
+    // addPredators(predators, INIT_VALUES.predators);
+    // addAvoiders(avoiders, INIT_VALUES.avoiders);
+    // addEaters(eaters, INIT_VALUES.eaters);
     function UIAdd(list, Base, data) {
       list.push(new Base(data.x, data.y, data.r))
     }
@@ -76,15 +74,34 @@ window.onload = function () {
   setup();
 
 
-  const ecoSys = new EcoSystem({
+  
+
+
+  const ecoSys = new EcoSystem();
+
+
+  ecoSys.registerAgents({
+    'CREATURE': Agent,
+    'PREDATOR': Predator,
+    'AVOIDER': Avoider,
+    'EATER': Eater,
+  })
+
+  ecoSys.addEntities({
     'CREATURE': creatures,
     'PREDATOR': predators,
     'AVOIDER': avoiders,
     'EATER': eaters,
     'FOOD': food,
     'POISON': poison
-  })
+  });
 
+  ecoSys.initialPopulation({
+    'CREATURE': random(100, 150),
+    'PREDATOR': random(2, 10),
+    'AVOIDER': random(20, 25),
+    'EATER': random(1, 4),
+  });
 
   var lastframe;
   var fps;
@@ -94,7 +111,11 @@ window.onload = function () {
     ctx.fillStyle = '#252525';
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
-
+    /**
+     * likes food dislikes poison
+     * run away form predators and eaters
+     * cloneItSelf
+     */
     ecoSys.addBehavior({
       name: 'CREATURE',
       like: 'FOOD',
@@ -115,6 +136,11 @@ window.onload = function () {
       }
     });
 
+    /**
+     * likes poison dislikes food
+     * seeks and eats creatures
+     * run away from eaters
+     */
     ecoSys.addBehavior({
       name: 'PREDATOR',
       like: 'POISON',
@@ -130,25 +156,35 @@ window.onload = function () {
       },
     });
 
+    /**
+     * likes food dislikes poison
+     * run away form predators, eaters, creatures
+     */
     ecoSys.addBehavior({
       name: 'AVOIDER',
       like: 'FOOD',
       dislike: 'POISON',
+      cloneItSelf: 0.0005,
       // likeDislikeWeight: [1, -1],
       fear: {
         'CREATURE': [-0.9, 100],
-        'EATER': [-2, 100],
-        'PREDATOR': [-5, 100, function () {
+        'EATER': [-1, 100],
+        'PREDATOR': [-1, 100, function () {
           this.health += this.badFoodMultiplier;
         }]
       },
     });
 
+    /**
+     * likes poison
+     * emits food as waste compound
+     * seeks creatures, predators, avoiders and EATS THEM
+     */
     ecoSys.addBehavior({
       name: 'EATER',
       like: 'POISON',
       dislike: 'POISON',
-      likeDislikeWeight: [1, -1],
+      likeDislikeWeight: [1, 1],
       fear: {
         'CREATURE': [1.0, 100, function (list, i) {
           list.splice(i, 1);
@@ -173,11 +209,12 @@ window.onload = function () {
       }
     });
 
+    ecoSys.render();
+    ecoSys.update();
 
     // RENDER
     renderItem(food, 'white', 1, true);
     renderItem(poison, 'crimson', 2);
-    ecoSys.render();
 
 
     // Add And Reset
@@ -188,7 +225,7 @@ window.onload = function () {
     if (creatures.length < 50) addCreatures(creatures, 50);
     if (food.length < 50) addItem(food, 20);
     if (eaters.length < 1) addEaters(eaters, 1);
-    if (creatures.length > MAX_CREATURES) creatures.shift();
+    if (creatures.length > MAX_CREATURES) creatures.pop();
 
 
     // WALLS

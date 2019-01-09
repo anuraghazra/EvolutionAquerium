@@ -112,6 +112,11 @@ Vector.prototype = {
   copy: function () {
     return new Vector(this.x, this.y);
   },
+  empty: function() {
+    this.x = 0;
+    this.y = 0;
+    return this;
+  },
   negative: function () {
     this.x = -this.x;
     this.y = -this.y;
