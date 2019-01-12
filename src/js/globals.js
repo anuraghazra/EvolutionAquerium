@@ -6,48 +6,48 @@ function addCreatures(list, max) {
   for (let i = 0; i < max; i++) {
     let x = random(WIDTH);
     let y = random(HEIGHT);
-    let radius = random(5, 7);
+    let radius = randomInt(5, 7);
     if (isInsideWall(x, y, radius)) {
       x = random(WIDTH);
       y = random(HEIGHT);
     }
-    list.push(new Agent(x, y, radius));
+    list.push(Agent.setPos(x, y).setRadius(radius).build());
   }
 }
 function addPredators(list, max) {
   for (let i = 0; i < max; i++) {
     let x = random(WIDTH);
     let y = random(HEIGHT);
-    let radius = random(6, 10);
+    let radius = randomInt(6, 10);
     if (isInsideWall(x, y, radius)) {
       x = random(WIDTH);
       y = random(HEIGHT);
     }
-    list.push(new Predator(x, y, radius));
+    list.push(Predator.setPos(x, y).setRadius(radius).build());
   }
 }
 function addAvoiders(list, max) {
   for (let i = 0; i < max; i++) {
     let x = random(WIDTH);
     let y = random(HEIGHT);
-    let radius = random(3, 8);
+    let radius = randomInt(3, 8);
     if (isInsideWall(x, y, radius)) {
       x = random(WIDTH);
       y = random(HEIGHT);
     }
-    list.push(new Avoider(x, y, radius));
+    list.push(Avoider.setPos(x, y).setRadius(radius).build());
   }
 }
 function addEaters(list, max) {
   for (let i = 0; i < max; i++) {
     let x = random(WIDTH);
     let y = random(HEIGHT);
-    let radius = random(3, 8);
+    let radius = randomInt(3, 8);
     if (isInsideWall(x, y, radius)) {
       x = random(WIDTH);
       y = random(HEIGHT);
     }
-    list.push(new Eater(x, y, radius));
+    list.push(Eater.setPos(x, y).setRadius(radius).build());
   }
 }
 function addItem(list, max, xx, yy) {
@@ -102,7 +102,6 @@ let debug_checkbox = document.getElementById('debug');
 let dnadebug_checkbox = document.getElementById('dnadebug');
 let render_names = document.getElementById('names');
 
-
 function batchRenderAgents(list) {
   for (let i = 0; i < list.length; i++) {
     list[i].render(ctx);
@@ -136,6 +135,9 @@ function random(min, max) {
   if (max === undefined) return Math.random() * min;
   return min + Math.random() * max
 }
+function randomInt(min, max) {
+  return Math.floor(random(min, max));
+}
 function clamp(value, min, max) {
   if (value >= max) {
     return max;
@@ -149,6 +151,11 @@ function dist(px, py, qx, qy) {
   let dx = px - qx;
   let dy = py - qy;
   return Math.sqrt(dx * dx + dy * dy);
+}
+function distSq(px, py, qx, qy) {
+  let dx = px - qx;
+  let dy = py - qy;
+  return (dx * dx + dy * dy);
 }
 const TWO_PI = Math.PI * 2;
 // function rgba(r, g, b, a) {

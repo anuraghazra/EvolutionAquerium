@@ -126,7 +126,7 @@ Vector.prototype = {
     return [this.x, this.y];
   },
   toString: function () {
-    return "[" + this.x + ", " + this.y + ", " + this.z + "]";
+    return "[" + this.x + ", " + this.y + "]";
   },
   project : function (v) {
     var coeff = ((this.x * v.x) + (this.y * v.y)) / ((v.x * v.x) + (v.y * v.y));

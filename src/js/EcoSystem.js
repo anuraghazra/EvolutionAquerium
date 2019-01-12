@@ -2,31 +2,37 @@ class EcoSystem {
 
   constructor() {
     // ALL THE ARRAYS
-    this.names = {};
+    this.groups = {};
+    this.entities = {};
     this.agents = {};
     this.behaviors = {};
   }
 
   addEntities(names) {
-    this.names = names;
+    for (const i in names) {
+      this.entities[i] = names[i];
+    }
   }
 
   initialPopulation(init) {
     this.initPopulation = init;
-    
+
     for (const i in this.initPopulation) {
-      if (this.agents[i] !== undefined) {
-        this.addAgent(this.agents[i], this.names[i],this.initPopulation[i]);        
+      if (this.groups[i] !== undefined) {
+        this.addAgent(this.agents[i], this.groups[i], this.initPopulation[i]);
       }
     }
   }
 
   registerAgents(agents) {
-   this.agents = agents;
+    for (const i in agents) {
+      this.agents[i] = agents[i];
+      this.groups[i] = new Array();
+    }
   }
 
   addAgent(name, list, max) {
-    for (let i = 0; i < Math.floor(max); i++) {
+    for (let i = 0; i < max; i++) {
       let x = random(WIDTH);
       let y = random(HEIGHT);
       let radius = random(5, 7);
@@ -34,13 +40,15 @@ class EcoSystem {
         x = random(WIDTH);
         y = random(HEIGHT);
       }
-      list.push(new name(x, y, radius));
+      if (name instanceof AgentBuilder) {
+        list.push(name.setPos(x, y).setRadius(radius).build());
+      }
     }
   }
 
   addBehavior(config) {
-    let agents = this.names[config.name];
-    let foodPoison = [this.names[config.like], this.names[config.dislike]];
+    let agents = this.groups[config.name];
+    let foodPoison = [this.entities[config.like], this.entities[config.dislike]];
     let likeDislikeWeight = config.likeDislikeWeight;
     let callback = config.callback;
     let fear = [];
@@ -49,7 +57,7 @@ class EcoSystem {
     if (!agents) return;
     // PARSE FEAR ARRAY
     for (const i in config.fear) {
-      fear.push([this.names[i], config.fear[i][0], config.fear[i][1], config.fear[i][2]]);
+      fear.push([this.groups[i], config.fear[i][0], config.fear[i][1], config.fear[i][2]]);
     }
     this.behaviors[config.name] = { agents, foodPoison, likeDislikeWeight, callback, fear, cloneItSelf }
   }
@@ -91,18 +99,18 @@ class EcoSystem {
    */
   batchUpdateAgents(list, foodPoison, weight, callback) {
     for (let i = list.length - 1; i >= 0; i--) {
+      list[i].update();
       list[i].updateFlockBehavior(flk_slider_separate.value, flk_slider_align.value, flk_slider_cohesion.value);
       list[i].applyFlock(list);
       list[i].Behavior(foodPoison[0], foodPoison[1], weight);
       list[i].boundaries();
-      list[i].update();
 
       if (callback) {
         callback.call(list[i], list, i);
       }
 
       // Kill the agent
-      if (list[i].dead()) {
+      if (list[i].isDead()) {
         let x = list[i].pos.x;
         let y = list[i].pos.y;
         foodPoison[0].push({ pos: new Vector(x, y) });
@@ -112,9 +120,9 @@ class EcoSystem {
   }
 
   render() {
-    for (const i in this.names) {
-      if (this.names[i][0] instanceof Agent) {
-        batchRenderAgents(this.names[i]);
+    for (const i in this.groups) {
+      if (this.groups[i][0] instanceof BaseAgent) {
+        batchRenderAgents(this.groups[i]);
       }
     }
   }

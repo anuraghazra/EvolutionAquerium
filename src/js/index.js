@@ -4,112 +4,68 @@ let WIDTH = window.innerWidth;
 let HEIGHT = 600;
 canvas.width = WIDTH;
 canvas.height = HEIGHT;
-
 let ctx = canvas.getContext('2d');
 
+
 let MAX_CREATURES = 300;
-const REPRODUCTION_RATE = 0.004;
+const REPRODUCTION_RATE = 0.5;
 
-// let walls = [];
-// walls.push(new Wall(200, 200, 20, 250));
-// walls.push(new Wall(800, 200, 20, 250));
-// walls.push(new Wall(400, 250, 250, 20));
-window.onload = function () {
+
+function load() {
   if (typeof window.orientation !== 'undefined') { MAX_CREATURES = 200 }
-
-  let predators = [];
-  let creatures = [];
-  let avoiders = [];
-  let eaters = [];
-  let food = [];
-  let poison = [];
-
-
-  const INIT_VALUES = {
-    food: random(50, 100),
-    poison: random(50, 20),
-    creatures: random(100, 150),
-    predators: random(2, 10),
-    avoiders: random(20, 25),
-    eaters: random(1, 4)
-  }
-
-  // === ADD ITEMS
-  function setup() {
-
-    addItem(food, INIT_VALUES.food);
-    addItem(poison, INIT_VALUES.poison);
-    // addCreatures(creatures, INIT_VALUES.creatures);
-    // addPredators(predators, INIT_VALUES.predators);
-    // addAvoiders(avoiders, INIT_VALUES.avoiders);
-    // addEaters(eaters, INIT_VALUES.eaters);
-    function UIAdd(list, Base, data) {
-      list.push(new Base(data.x, data.y, data.r))
-    }
-    // UI add
-    let add = document.getElementById('addnew');
-    canvas.addEventListener('click', function (e) {
-      switch (add.value) {
-        case AGENT_TYPE.MALE || AGENT_TYPE.FEMALE:
-          UIAdd(creatures, Agent, { x: e.offsetX, y: e.offsetY, r: 10 });
-          break;
-        case AGENT_TYPE.PREDATOR:
-          UIAdd(predators, Predator, { x: e.offsetX, y: e.offsetY, r: 10 });
-          break;
-        case AGENT_TYPE.AVOIDER:
-          UIAdd(avoiders, Avoider, { x: e.offsetX, y: e.offsetY, r: 10 });
-          break;
-        case AGENT_TYPE.EATER:
-          UIAdd(eaters, Eater, { x: e.offsetX, y: e.offsetY, r: 5 });
-          break;
-        case 'FOOD':
-          food.push({ pos: new Vector(e.offsetX, e.offsetY) })
-          break;
-        case 'POISON':
-          poison.push({ pos: new Vector(e.offsetX, e.offsetY) })
-          break;
-      }
-    })
-  }
-  setup();
-
-
-  
-
 
   const ecoSys = new EcoSystem();
 
-
+  // register classes it will also create corresponding Arrays
+  // which you can use by calling ecoSys.groups[your_given_name]
   ecoSys.registerAgents({
-    'CREATURE': Agent,
-    'PREDATOR': Predator,
-    'AVOIDER': Avoider,
-    'EATER': Eater,
-  })
+    CREATURE: Agent,
+    PREDATOR: Predator,
+    AVOIDER: Avoider,
+    EATER: Eater
+  });
 
+  // creates a Array which you can access with ecoSys.entities 
   ecoSys.addEntities({
-    'CREATURE': creatures,
-    'PREDATOR': predators,
-    'AVOIDER': avoiders,
-    'EATER': eaters,
-    'FOOD': food,
-    'POISON': poison
+    FOOD: [],
+    POISON: []
   });
 
+  // initialPopulation have to use the same name
+  // which you configure in registerAgents
   ecoSys.initialPopulation({
-    'CREATURE': random(100, 150),
-    'PREDATOR': random(2, 10),
-    'AVOIDER': random(20, 25),
-    'EATER': random(1, 4),
+    CREATURE: randomInt(100, 150),
+    PREDATOR: randomInt(2, 10),
+    AVOIDER: randomInt(20, 25),
+    EATER: randomInt(1, 4),
   });
+
+  console.log(ecoSys)
+
+  let debugAgent = null;
+  canvas.addEventListener('mousedown', function (e) {
+    for (let i = 0; i < ecoSys.groups.CREATURE.length; i++) {
+      let a = ecoSys.groups.CREATURE[i];
+      if (dist(e.offsetX, e.offsetY, a.pos.x, a.pos.y) < a.radius * 2) {
+        debugAgent = a;
+      }
+    }
+  })
 
   var lastframe;
   var fps;
-
   //  ANIMATE LOOP
   function animate() {
     ctx.fillStyle = '#252525';
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+
+    if (debugAgent) {
+      debugAgent.renderAgentDebug(ctx);
+      debugAgent.renderHealth(ctx);
+      debugAgent.renderDebugDNA(ctx);
+      debugAgent.renderDebug(ctx);
+    }
 
     /**
      * likes food dislikes poison
@@ -126,12 +82,9 @@ window.onload = function () {
       },
       cloneItSelf: 0.0015,
       callback: function () {
-        if (
-          creatures.length > 0 &&
-          random(1) < REPRODUCTION_RATE
-          && creatures.length < MAX_CREATURES
-        ) {
-          this.reproduce(creatures);
+        if ( ecoSys.groups.CREATURE.length < MAX_CREATURES
+          && random(1) < REPRODUCTION_RATE) {
+          this.reproduce(ecoSys.groups.CREATURE);
         }
       }
     });
@@ -175,6 +128,7 @@ window.onload = function () {
       },
     });
 
+
     /**
      * likes poison
      * emits food as waste compound
@@ -204,7 +158,7 @@ window.onload = function () {
       },
       callback: function () {
         if (random(0, 1) < 0.05) {
-          addItem(food, 1, this.pos.x, this.pos.y)
+          addItem(ecoSys.entities.FOOD, 1, this.pos.x, this.pos.y)
         }
       }
     });
@@ -213,38 +167,22 @@ window.onload = function () {
     ecoSys.update();
 
     // RENDER
-    renderItem(food, 'white', 1, true);
-    renderItem(poison, 'crimson', 2);
+    renderItem(ecoSys.entities.FOOD, 'white', 1, true);
+    renderItem(ecoSys.entities.POISON, 'crimson', 2);
 
 
     // Add And Reset
-    if (random(1) < 0.03) addItem(food, 5);
-    if (random(1) < 0.03) addItem(poison, 1);
-    if (random(1) < 0.005) addPredators(predators, 1);
-    if (random(1) < 0.005) addAvoiders(avoiders, 1);
-    if (creatures.length < 50) addCreatures(creatures, 50);
-    if (food.length < 50) addItem(food, 20);
-    if (eaters.length < 1) addEaters(eaters, 1);
-    if (creatures.length > MAX_CREATURES) creatures.pop();
+    if (random(1) < 0.03) addItem(ecoSys.entities.FOOD, 10);
+    if (random(1) < 0.03) addItem(ecoSys.entities.POISON, 1);
 
+    if (random(1) < 0.005) addPredators(ecoSys.groups.PREDATOR, 1);
+    if (random(1) < 0.005) addAvoiders(ecoSys.groups.AVOIDER, 1);
 
-    // WALLS
-    // FOR LOOP HELL :p
-    // for (let w = 0; w < walls.length; w++) {
-    //   walls[w].render(ctx);
-    //   for (const c of creatures) {
-    //     walls[w].collide(c);
-    //   }
-    //   for (p of predators) {
-    //     walls[w].collide(p);
-    //   }
-    //   for (a of avodiers) {
-    //     walls[w].collide(a);
-    //   }
-    //   for (e of eaters) {
-    //     walls[w].collide(e);
-    //   }
-    // }
+    if (ecoSys.groups.CREATURE.length < 20) addCreatures(ecoSys.groups.CREATURE, 20);
+    if (ecoSys.entities.FOOD.length < 50) addItem(ecoSys.entities.FOOD, 20);
+    if (ecoSys.groups.EATER.length < 1) addEaters(ecoSys.groups.EATER, 1);
+    if (ecoSys.groups.CREATURE.length > MAX_CREATURES) ecoSys.groups.CREATURE.pop();
+
 
     requestAnimationFrame(animate);
     if (!lastframe) {
@@ -258,16 +196,21 @@ window.onload = function () {
   }
   animate();
 
+
   // Stats
   window.setInterval(function () {
     renderStats({
-      'Good Creatures': creatures.length,
-      'Predators': predators.length,
-      'Avoiders': avoiders.length,
-      'Eaters': eaters.length,
-      'Foods': food.length,
-      'Poison': poison.length,
+      'Good Creatures': ecoSys.groups.CREATURE.length,
+      'Predators': ecoSys.groups.PREDATOR.length,
+      'Avoiders': ecoSys.groups.AVOIDER.length,
+      'Eaters': ecoSys.groups.EATER.length,
+      'Foods': ecoSys.entities.FOOD.length,
+      'Poison': ecoSys.entities.POISON.length,
       'FPS': fps
     })
   }, 100);
 }
+
+
+
+window.onload = load;
