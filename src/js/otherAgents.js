@@ -17,23 +17,23 @@ class AgentBuilder {
     this.pos = new Vector(x, y);
     return this;
   }
-  setMaxRadius(r=20) {
+  setMaxRadius(r = 20) {
     this.maxRadius = r;
     return this;
   }
-  setRadius(r=10) {
+  setRadius(r = 10) {
     this.radius = r;
     return this;
   }
-  setMaxSpeed(val=1.5) {
+  setMaxSpeed(val = 1.5) {
     this.maxSpeed = val;
     return this;
   }
-  setMaxForce(val=0.05) {
+  setMaxForce(val = 0.05) {
     this.maxForce = val;
     return this;
   }
-  setHealthDecrease(val=0.003) {
+  setHealthDecrease(val = 0.003) {
     this.healthDecrease = val;
     return this;
   }
@@ -81,7 +81,7 @@ let Predator = new AgentBuilder('PREDATOR')
   .setMaxForce(0.05)
   .setHealthDecrease(0.002)
   .setColor([255, 0, 0])
-  .setFoodMultiplier([0.5,-0.5]);
+  .setFoodMultiplier([0.5, -0.5]);
 
 
 /**
@@ -95,7 +95,7 @@ let Avoider = new AgentBuilder('AVOIDER')
   .setMaxForce(0.2)
   .setHealthDecrease(0.003)
   .setColor([255, 165, 0])
-  .setFoodMultiplier([0.5,-0.5])
+  .setFoodMultiplier([0.5, -0.5])
 
 
 /**
@@ -109,8 +109,21 @@ let Eater = new AgentBuilder('EATER')
   .setMaxForce(0.05)
   .setHealthDecrease(0.001)
   .setColor([0, 191, 255])
-  .setFoodMultiplier([0.5, 0])    
+  .setFoodMultiplier([0.5, 0])
 
+/**
+* @class Mother
+* @extends Agent
+*/
+let Mother = new AgentBuilder('MOTHER')
+  .setDNA([1, 1, 200, 200])
+  .setRadius(15)
+  .setMaxRadius(20)
+  .setMaxSpeed(3)
+  .setMaxForce(0.05)
+  .setHealthDecrease(0.000001)
+  .setColor([255, 255, 255])
+  .setFoodMultiplier([0.5, 0])
 
 //#region old classes
 // class Predator extends Agent {

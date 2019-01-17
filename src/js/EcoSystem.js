@@ -2,10 +2,10 @@ class EcoSystem {
 
   constructor() {
     // ALL THE ARRAYS
-    this.groups = {};
-    this.entities = {};
-    this.agents = {};
-    this.behaviors = {};
+    this.groups = {};     // agents
+    this.entities = {};   // generic container (food, poison)
+    this.agents = {};     // agent classes
+    this.behaviors = {};  // calculated behaviors
   }
 
   addEntities(names) {
@@ -102,7 +102,9 @@ class EcoSystem {
       list[i].update();
       list[i].updateFlockBehavior(flk_slider_separate.value, flk_slider_align.value, flk_slider_cohesion.value);
       list[i].applyFlock(list);
-      list[i].Behavior(foodPoison[0], foodPoison[1], weight);
+      if (foodPoison[0] !== undefined && foodPoison[1] !== undefined) {
+        list[i].Behavior(foodPoison[0], foodPoison[1], weight);
+      }
       list[i].boundaries();
 
       if (callback) {
@@ -113,7 +115,7 @@ class EcoSystem {
       if (list[i].isDead()) {
         let x = list[i].pos.x;
         let y = list[i].pos.y;
-        foodPoison[0].push({ pos: new Vector(x, y) });
+        foodPoison&&foodPoison[0].push({ pos: new Vector(x, y) });
         list.splice(i, 1);
       }
     }

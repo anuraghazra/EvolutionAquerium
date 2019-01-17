@@ -22,7 +22,8 @@ function load() {
     CREATURE: Agent,
     PREDATOR: Predator,
     AVOIDER: Avoider,
-    EATER: Eater
+    EATER: Eater,
+    MOTHER : Mother
   });
 
   // creates a Array which you can access with ecoSys.entities 
@@ -38,6 +39,7 @@ function load() {
     PREDATOR: randomInt(2, 10),
     AVOIDER: randomInt(20, 25),
     EATER: randomInt(1, 4),
+    MOTHER: 1,
   });
 
   console.log(ecoSys)
@@ -160,6 +162,49 @@ function load() {
         if (random(0, 1) < 0.05) {
           addItem(ecoSys.entities.FOOD, 1, this.pos.x, this.pos.y)
         }
+      }
+    });
+
+    
+    /**
+     * MOTHER
+     * likes everyone
+     * emits food as waste compound
+     * seeks creatures, predators, avoiders and HEALS THEM
+     */
+    ecoSys.addBehavior({
+      name: 'MOTHER',
+      like: 'POISON',
+      dislike: 'POISON',
+      likeDislikeWeight: [2, 1],
+      fear: {
+        'CREATURE': [0, 30, function (list, i) {
+          // list.splice(i, 1);
+          list[i].health += this.goodFoodMultiplier;
+          this.radius += this.goodFoodMultiplier;
+        }],
+        'PREDATOR': [0, 30, function (list, i) {
+          // list.splice(i, 1);
+          list[i].health += this.goodFoodMultiplier;
+          this.radius += this.goodFoodMultiplier;
+        }],
+        'AVOIDER': [0, 30, function (list, i) {
+          // list.splice(i, 1);
+          list[i].health += this.goodFoodMultiplier;
+          this.radius += this.goodFoodMultiplier;
+        }],
+      },
+      callback: function () {
+        if (random(1) < 0.3) {
+          addItem(ecoSys.entities.FOOD, 10, this.pos.x, this.pos.y);
+        }
+        // if (random(0, 1) < 0.03) {
+        //   ecoSys.groups.CREATURE.push(Agent.setPos(this.pos.x, this.pos.y).build())
+        // } else if (random(0, 1) < 0.02) {
+        //   ecoSys.groups.AVOIDER.push(Avoider.setPos(this.pos.x, this.pos.y).build())
+        // } else if (random(0, 1) < 0.01) {
+        //   ecoSys.groups.PREDATOR.push(Predator.setPos(this.pos.x, this.pos.y).build())
+        // }
       }
     });
 
