@@ -10,6 +10,8 @@
 
 ![Craig Reynold's](/src/screenshot.png)
 
+Check-out [DevEnv](https://github.com/anuraghazra/EvolutionAquerium/tree/devEnv) Branch for Beta Optimization and Development which includes Refactored Code and EcoSystem.js Class to manage Creatures and Easy-to-use API for making new Agents.
+
 # How It Works?
 
 Well that's an obvious question.
