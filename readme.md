@@ -1,4 +1,14 @@
 # Evolution Aquerium
+## Beta DevEnv
+
+> NOTE : this branch is only for development purposes
+
+* TODO : 
+  * Refactor
+  * Optimization
+  * EcoSystem.js clean up
+  * Performance Optimization
+
 [![](https://img.shields.io/github/license/anuraghazra/EvolutionAquerium.svg)](https://github.com/anuraghazra/EvolutionAquerium/blob/master/LICENSE)
 [![](https://img.shields.io/github/stars/anuraghazra/EvolutionAquerium.svg)](https://github.com/anuraghazra/EvolutionAquerium)
 
