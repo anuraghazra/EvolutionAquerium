@@ -42,7 +42,7 @@ function load() {
   ecoSys.initialPopulation({
     CREATURE: randomInt(50, 150),
     PREDATOR: randomInt(5, 10),
-    AVOIDER: randomInt(20, 25),
+    AVOIDER: randomInt(10, 20),
     EATER: randomInt(1, 4),
   });
 

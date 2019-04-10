@@ -54,7 +54,7 @@ class EcoSystem {
    * adds creatures to groups object
    */
   add(type, x, y, radius) {
-    radius = radius || random(5, 7);
+    radius = radius || 5;
     let name = this.agents[type]
     this.groups[type].push(name.setPos(x, y).setRadius(radius).build());
   }
@@ -71,7 +71,7 @@ class EcoSystem {
     for (let i = 0; i < max; i++) {
       let x = random(WIDTH);
       let y = random(HEIGHT);
-      let radius = random(5, 7);
+      let radius = random(4, 7);
       if (isInsideWall(x, y, radius)) {
         x = random(WIDTH);
         y = random(HEIGHT);
