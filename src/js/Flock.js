@@ -1,5 +1,5 @@
 /**
- * @class Flock()
+ * @class Flock
  * handles flocking behavior
  */
 class Flock {

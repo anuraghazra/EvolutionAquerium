@@ -1,22 +1,43 @@
+/**
+ * @class EcoSystem
+ */
 class EcoSystem {
 
   constructor() {
-    // ALL THE ARRAYS
     this.groups = {};     // agents
     this.entities = {};   // generic container (food, poison)
     this.agents = {};     // agent classes
     this.behaviors = {};  // calculated behaviors
   }
 
+  /**
+   * @method addEntities
+   * @param {Object} names 
+   */
   addEntities(names) {
     for (const i in names) {
       this.entities[i] = names[i];
     }
   }
 
+  /**
+   * @method registerAgents
+   * @param {Object} agents 
+   * agents object is a Object of BaseAgent Constructor
+   */
+  registerAgents(agents) {
+    this.agents = agents;
+    for (const i in agents) {
+      this.groups[i] = []
+    }
+  }
+
+  /**
+   * @method initialPopulation
+   * @param {Object} init 
+   */
   initialPopulation(init) {
     this.initPopulation = init;
-
     for (const i in this.initPopulation) {
       if (this.groups[i] !== undefined) {
         this.addAgent(this.agents[i], this.groups[i], this.initPopulation[i]);
@@ -24,13 +45,28 @@ class EcoSystem {
     }
   }
 
-  registerAgents(agents) {
-    for (const i in agents) {
-      this.agents[i] = agents[i];
-      this.groups[i] = new Array();
-    }
+  /**
+   * @method add
+   * @param {String} type 
+   * @param {Number} x 
+   * @param {Number} y 
+   * @param {Nmber} radius 
+   * adds creatures to groups object
+   */
+  add(type, x, y, radius) {
+    radius = radius || random(5, 7);
+    let name = this.agents[type]
+    this.groups[type].push(name.setPos(x, y).setRadius(radius).build());
   }
 
+
+  /**
+   * @metho addAgent
+   * @param {AgentBuilder} name 
+   * @param {Array} list 
+   * @param {Number} max 
+   * adds agents to specific list in random pos
+   */
   addAgent(name, list, max) {
     for (let i = 0; i < max; i++) {
       let x = random(WIDTH);
@@ -46,6 +82,19 @@ class EcoSystem {
     }
   }
 
+
+
+  /**
+   * @method addBehavior
+   * @param {Object} config 
+   * @param {String} config.name
+   * @param {String} config.like
+   * @param {String} config.dislike
+   * @param {Array} config.likeDislikeWeight
+   * @param {Number} config.cloneItSelf
+   * @param {Object} config.fear
+   * @param {Function} config.callback
+   */
   addBehavior(config) {
     let agents = this.groups[config.name];
     let foodPoison = [this.entities[config.like], this.entities[config.dislike]];
@@ -62,10 +111,14 @@ class EcoSystem {
     this.behaviors[config.name] = { agents, foodPoison, likeDislikeWeight, callback, fear, cloneItSelf }
   }
 
+  /**
+   * @method update
+   * updates all the behaviors 
+   */
   update() {
     for (const a in this.behaviors) {
       let behave = this.behaviors[a];
-      this.batchUpdateAgents(behave.agents, behave.foodPoison, behave.likeDislikeWeight, function (list, i) {
+      this.batchUpdateAgents(behave.agents, behave.foodPoison, behave.likeDislikeWeight, (list, i) => {
         let current = list[i];
 
         // CLONE (i can do that with callback but just experimenting)
@@ -82,20 +135,17 @@ class EcoSystem {
         }
 
         behave.callback && behave.callback.call(current);
-      }.bind(this))
+      })
     }
   }
 
 
   /**
-   * @method batchUpdateAgents()
+   * @method batchUpdateAgents
    * @param {Array} list 
-   * @param {Array} like 
-   * @param {Array} dislike 
-   * @param {2DArray} weight 
+   * @param {Array} foodPoison 
+   * @param {Number} weight 
    * @param {Function} callback 
-   * updates the flocking, behavior, boundaries, and renders all the agents
-   * and also checks for dead state
    */
   batchUpdateAgents(list, foodPoison, weight, callback) {
     for (let i = list.length - 1; i >= 0; i--) {
@@ -115,12 +165,16 @@ class EcoSystem {
       if (list[i].isDead()) {
         let x = list[i].pos.x;
         let y = list[i].pos.y;
-        foodPoison&&foodPoison[0].push({ pos: new Vector(x, y) });
+        foodPoison && foodPoison[0].push({ pos: new Vector(x, y) });
         list.splice(i, 1);
       }
     }
   }
 
+
+  /**
+   * @method render
+   */
   render() {
     for (const i in this.groups) {
       if (this.groups[i][0] instanceof BaseAgent) {

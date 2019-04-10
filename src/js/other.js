@@ -33,35 +33,35 @@
 // === ADD ITEMS
 function setup() {
 
-  addItem(food, INIT_VALUES.food);
-  addItem(poison, INIT_VALUES.poison);
+  // addItem(food, INIT_VALUES.food);
+  // addItem(poison, INIT_VALUES.poison);
 
-  function UIAdd(list, Base, data) {
-    list.push((Base.setPos(data.x, data.y).setRadius(data.r).build()));
-  }
+  // function UIAdd(list, Base, data) {
+  //   list.push((Base.setPos(data.x, data.y).setRadius(data.r).build()));
+  // }
   // UI add
   let add = document.getElementById('addnew');
   canvas.addEventListener('click', function (e) {
     UIAdd(creatures, Agent, { x: e.offsetX, y: e.offsetY, r: 5 });
-    //   switch (add.value) {
-    //     case AGENT_TYPE.MALE || AGENT_TYPE.FEMALE:
-    //       break;
-    //     case AGENT_TYPE.PREDATOR:
-    //       UIAdd(predators, Predator, { x: e.offsetX, y: e.offsetY, r: 10 });
-    //       break;
-    //     case AGENT_TYPE.AVOIDER:
-    //       UIAdd(avoiders, Avoider, { x: e.offsetX, y: e.offsetY, r: 10 });
-    //       break;
-    //     case AGENT_TYPE.EATER:
-    //       UIAdd(eaters, Eater, { x: e.offsetX, y: e.offsetY, r: 5 });
-    //       break;
-    //     case 'FOOD':
-    //       food.push({ pos: new Vector(e.offsetX, e.offsetY) })
-    //       break;
-    //     case 'POISON':
-    //       poison.push({ pos: new Vector(e.offsetX, e.offsetY) })
-    //       break;
-    //   }
+    switch (add.value) {
+      case AGENT_TYPE.MALE || AGENT_TYPE.FEMALE:
+        break;
+      case AGENT_TYPE.PREDATOR:
+        UIAdd(predators, Predator, { x: e.offsetX, y: e.offsetY, r: 10 });
+        break;
+      case AGENT_TYPE.AVOIDER:
+        UIAdd(avoiders, Avoider, { x: e.offsetX, y: e.offsetY, r: 10 });
+        break;
+      case AGENT_TYPE.EATER:
+        UIAdd(eaters, Eater, { x: e.offsetX, y: e.offsetY, r: 5 });
+        break;
+      case 'FOOD':
+        food.push({ pos: new Vector(e.offsetX, e.offsetY) })
+        break;
+      case 'POISON':
+        poison.push({ pos: new Vector(e.offsetX, e.offsetY) })
+        break;
+    }
   })
 }
 setup();

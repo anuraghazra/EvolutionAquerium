@@ -20,7 +20,7 @@ class BaseAgent {
     if (builder === undefined) builder = {};
     this.builder = builder;
 
-    this.uid = randomInt(9999);
+
     this.age = 1;
     this.health = 1;
     this.radius = radius || 10;
@@ -31,9 +31,12 @@ class BaseAgent {
     this.badFoodMultiplier = builder.badFoodMultiplier || -0.4;
     this.color = color;
     this.hasReproduced = 0;
-    this.parent = null;
-    this.childs = [];
-    this.partners = {};
+
+    // only for debuging purposes
+    // this.uid = randomInt(9999);
+    // this.parent = null;
+    // this.childs = [];
+    // this.partners = {};
 
     this.flock = new Flock(this);
     this.flockMultiplier = {
@@ -327,20 +330,22 @@ class BaseAgent {
         if (isAdult && isNotSameGender && isHealthy) {
           this.hasReproduced++;
           agentA.hasReproduced++;
-          this.partners[agentA.uid] = agentA;
-          agentA.partners[this.uid] = this;
           let x = this.pos.x + random(this.vel.x, agentA.vel.x);
           let y = this.pos.y + random(this.vel.y, agentA.vel.y);
           // let childColor = [155, 100, 255];
           // x, y, 5, this.dna, childColor
           let newchild = this.builder
-            .setPos(x, y)
-            .setRadius(5)
-            .setDNA(this.dna)
-            .build()
-            // .setColor(childColor)
-          newchild.parent = this;
-          this.childs.push(newchild);
+          .setPos(x, y)
+          .setRadius(5)
+          .setDNA(this.dna)
+          .build()
+          // .setColor(childColor)
+          
+          // Only for debug purposes
+          // this.partners[agentA.uid] = agentA;
+          // agentA.partners[this.uid] = this;
+          // newchild.parent = this;
+          // this.childs.push(newchild);
           boids.push(newchild);
           return;
         }
@@ -399,7 +404,12 @@ class BaseAgent {
     ctx.closePath();
   }
 
+  /**
+   * Only For Debugging Purposes
+   * @param {*} ctx 
+   */
   renderAgentDebug(ctx) {
+    if (!ENABLE_SUPER_DEBUG) return;
     let x = (this.pos.x - this.radius);
     let y = (this.pos.y - this.radius) - 30;
 
@@ -432,7 +442,7 @@ class BaseAgent {
       }
     }
 
-    for (let j = this.childs.length; j >= 0 ; j--) {
+    for (let j = this.childs.length; j >= 0; j--) {
       if (this.childs[j]) {
         ctx.beginPath();
         ctx.strokeStyle = 'deepskyblue';
