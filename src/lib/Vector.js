@@ -112,6 +112,11 @@ Vector.prototype = {
   copy: function () {
     return new Vector(this.x, this.y);
   },
+  empty: function() {
+    this.x = 0;
+    this.y = 0;
+    return this;
+  },
   negative: function () {
     this.x = -this.x;
     this.y = -this.y;
@@ -121,7 +126,7 @@ Vector.prototype = {
     return [this.x, this.y];
   },
   toString: function () {
-    return "[" + this.x + ", " + this.y + ", " + this.z + "]";
+    return "[" + this.x + ", " + this.y + "]";
   },
   project : function (v) {
     var coeff = ((this.x * v.x) + (this.y * v.y)) / ((v.x * v.x) + (v.y * v.y));
