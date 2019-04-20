@@ -20,7 +20,7 @@ class AgentBuilder {
     this.maxRadius = r;
     return this;
   }
-  setRadius(r = 10) {
+  setRadius(r = 5) {
     this.radius = r;
     return this;
   }
@@ -89,7 +89,7 @@ let Predator = new AgentBuilder('PREDATOR')
  */
 let Avoider = new AgentBuilder('AVOIDER')
   .setRadius(5)
-  .setMaxRadius(10)
+  .setMaxRadius(8)
   .setMaxSpeed(4)
   .setMaxForce(0.2)
   .setHealthDecrease(0.003)

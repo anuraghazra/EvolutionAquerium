@@ -71,7 +71,7 @@ class EcoSystem {
     for (let i = 0; i < max; i++) {
       let x = random(WIDTH);
       let y = random(HEIGHT);
-      let radius = random(4, 7);
+      let radius = random(4, 5);
       if (isInsideWall(x, y, radius)) {
         x = random(WIDTH);
         y = random(HEIGHT);

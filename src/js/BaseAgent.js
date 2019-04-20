@@ -23,7 +23,7 @@ class BaseAgent {
 
     this.age = 1;
     this.health = 1;
-    this.radius = radius || 10;
+    this.radius = radius || 5;
     this.maxSpeed = builder.maxSpeed || 1.5;
     this.maxForce = builder.maxForce || 0.05;
     this.healthDecrease = builder.healthDecrease || 0.003;

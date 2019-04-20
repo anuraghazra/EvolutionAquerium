@@ -1,6 +1,7 @@
 * {
   font-family: 'Century Gothic';
   user-select: none;
+  box-sizing: border-box;
   /* color: rgb(0, 191, 255) */
 }
 
@@ -11,6 +12,7 @@ body {
 
 canvas {
   margin: 0;
+  padding: 0;
 }
 
 .github-corner:hover .octo-arm {

@@ -40,7 +40,7 @@ function load() {
   // initialPopulation have to use the same name
   // which you configure in registerAgents
   ecoSys.initialPopulation({
-    CREATURE: randomInt(50, 150),
+    CREATURE: 150,
     PREDATOR: randomInt(5, 10),
     AVOIDER: randomInt(10, 20),
     EATER: randomInt(1, 4),
@@ -65,14 +65,14 @@ function load() {
 
   function populationConstraints() {
     // Add And Reset
-    if (random(1) < 0.03) addItem(ecoSys.entities.FOOD, 10);
+    if (random(1) < 0.03) addItem(ecoSys.entities.FOOD, 8);
     if (random(1) < 0.03) addItem(ecoSys.entities.POISON, 1);
 
     if (random(1) < 0.005) addPredators(ecoSys.groups.PREDATOR, 1);
     if (random(1) < 0.005) addAvoiders(ecoSys.groups.AVOIDER, 1);
 
     if (ecoSys.groups.CREATURE.length < 20) {
-      addCreatures(ecoSys.groups.CREATURE, 20);
+      addCreatures(ecoSys.groups.CREATURE, 10);
     }
     if (ecoSys.groups.EATER.length < 1) {
       addEaters(ecoSys.groups.EATER, 1);
