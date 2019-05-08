@@ -90,8 +90,14 @@ function load() {
   var fps;
   //  ANIMATE LOOP
   function animate() {
-    ctx.fillStyle = '#252525';
+    let grd = ctx.createRadialGradient(WIDTH / 2, HEIGHT / 2, 0, WIDTH / 2, HEIGHT / 2, WIDTH);
+    grd.addColorStop(0, "rgba(25,25,25,1)");
+    grd.addColorStop(1, "rgba(0,0,25,1)");
+    // Fill with gradient
+    ctx.fillStyle = grd;
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    // ctx.fillStyle = '#252525';
+    // ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
     /**
      * likes food dislikes poison
