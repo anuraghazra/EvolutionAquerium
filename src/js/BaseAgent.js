@@ -3,8 +3,7 @@ const mutationRate = 0.5;
 /**
  * @class Agent
  */
-class BaseAgent {
-
+class BaseAgent extends Renderer {
   /**
    * 
    * @param {Number} x 
@@ -12,15 +11,13 @@ class BaseAgent {
    * @param {Number} radius 
    * @param {Array} dna 
    */
-  constructor(x, y, radius, dna, color, builder) {
+  constructor(x, y, radius = 5, dna, color, builder = {}) {
+    super();
     this.pos = new Vector(x, y);
     this.acc = new Vector(0, 0);
     this.vel = new Vector(0, -2);
 
-    if (builder === undefined) builder = {};
     this.builder = builder;
-
-
     this.age = 1;
     this.health = 1;
     this.radius = radius || 5;
@@ -45,63 +42,55 @@ class BaseAgent {
       cohesion: 0.7
     };
 
-    this.type = builder.type;
-    this.sex = (random(1) < 0.5) ? 'MALE' : 'FEMALE';
-
-    if (!this.color && this.getGender() === 'MALE') this.color = [0, 170, 0]
-    if (!this.color && this.getGender() === 'FEMALE') this.color = [255, 39, 201]
-    // if (color == undefined) {
-    // } else {
-    //   let mappedcolor = this.color.map(i => i + random(-50, 50));
-    //   if (this.getGender() === 'MALE') this.color = mappedcolor;
-    //   if (this.getGender() === 'FEMALE') this.color = mappedcolor;
-    // }
-
-    let names_female = [
+    this.female_names = [
       'hanna', 'mona', 'cutie',
       'sweety', 'sofia', 'rose',
       'laisy', 'daisy', 'mia'
     ];
-    let names_male = [
+    this.male_names = [
       'joe', 'jim', 'kim',
       'keo', 'shaun', 'morgan',
       'jery', 'tom', 'anu',
       'brian', 'ninja', 'daniel'
     ];
 
-    this.name = (this.getGender() === 'MALE') ? this.getRandomName(names_male) : this.getRandomName(names_female);
-    this.maxRadius = builder.maxRadius || ((this.getGender() === 'FEMALE') ? 15 : 10);
+    this.type = builder.type;
+    this.sex = random(1) < 0.5 ? 'MALE' : 'FEMALE';
+
+    if (!this.color && this.getGender() === 'MALE') this.color = [0, 170, 0];
+    if (!this.color && this.getGender() === 'FEMALE') this.color = [255, 39, 201];
+
+    this.name = this.getRandomName()
+    this.maxRadius = builder.maxRadius || (this.getGender() === 'FEMALE') ? 15 : 10;
 
     this.mutate = function (dnaindex, mr, value) {
       if (random(1) < mr) {
         dnaindex += random(value[0], value[1]);
       }
     };
-    this.dna = this.SetDNA(dna);
+    this.dna = this.setDNA(dna);
   }
 
-  getRandomName(arr) {
-    return arr[Math.floor(random(0, arr.length - 1))];
+  getRandomName() {
+    if (this.getGender() === 'MALE') {
+      return getRandomArrayItem(this.male_names);
+    }
+    return getRandomArrayItem(this.female_names);
   }
 
   getGender() {
     return this.sex;
   }
 
-  SetDNA(dna) {
+  setDNA(dna) {
     let tmpdna = [];
 
     if (dna == undefined) {
-      // food weight
-      // poison weight
-      // food perception
-      // posion perception
-      tmpdna[0] = random(0.5, 1);
-      tmpdna[1] = random(-0.3, -0.8);
-      tmpdna[2] = random(20, 100);
-      tmpdna[3] = random(20, 100);
-    }
-    else {
+      tmpdna[0] = random(0.5, 1);     // food weight
+      tmpdna[1] = random(-0.3, -0.8); // poison weight
+      tmpdna[2] = random(20, 100);    // food perception
+      tmpdna[3] = random(20, 100);    // poison perception
+    } else {
       tmpdna[0] = dna[0];
       tmpdna[1] = dna[1];
       tmpdna[2] = dna[2];
@@ -136,10 +125,6 @@ class BaseAgent {
    */
   applyForce(f) { this.acc.add(f) }
 
-  /**
-   * @method dead()
-   * return agent's is dead status
-   */
   isDead() {
     return (this.health <= 0);
   }
@@ -149,18 +134,18 @@ class BaseAgent {
    * check boundaries and limit agents within screen
    */
   boundaries() {
-    let d = 100;
+    let maxDist = 100;
     let desire = null;
-    if (this.pos.x < d) {
+    if (this.pos.x < maxDist) {
       desire = new Vector(this.maxSpeed, this.vel.y);
     }
-    else if (this.pos.x > WIDTH - d) {
+    else if (this.pos.x > WIDTH - maxDist) {
       desire = new Vector(-this.maxSpeed, this.vel.y);
     }
-    if (this.pos.y < d) {
+    if (this.pos.y < maxDist) {
       desire = new Vector(this.vel.x, this.maxSpeed);
     }
-    else if (this.pos.y > HEIGHT - d) {
+    else if (this.pos.y > HEIGHT - maxDist) {
       desire = new Vector(this.vel.x, -this.maxSpeed);
     }
     if (desire !== null) {
@@ -184,16 +169,14 @@ class BaseAgent {
   defineFear(list, weight, perception, callback) {
     let record = Infinity;
     let close = null;
+
     for (let i = list.length - 1; i >= 0; i--) {
-      let d = dist(this.pos.x, this.pos.y, list[i].pos.x, list[i].pos.y);
-      if (d < this.radius) {
-        if (callback) {
-          callback.call(this, list, i);
-        }
-      }
-      else {
-        if (d < record && d < perception) {
-          record = d;
+      let maxDist = dist(this.pos.x, this.pos.y, list[i].pos.x, list[i].pos.y);
+      if (maxDist < this.radius) {
+        callback && callback.call(this, list, i);
+      } else {
+        if (maxDist < record && maxDist < perception) {
+          record = maxDist;
           close = list[i];
         }
       }
@@ -218,8 +201,7 @@ class BaseAgent {
     if (!weights) {
       goodFood.mult(this.dna[0]);
       badFood.mult(this.dna[1]);
-    }
-    else {
+    } else {
       goodFood.mult(weights[0]);
       badFood.mult(weights[1]);
     }
@@ -272,19 +254,18 @@ class BaseAgent {
     let record = Infinity;
     let close = null;
     for (let i = list.length - 1; i >= 0; i--) {
-      let d = dist(this.pos.x, this.pos.y, list[i].pos.x, list[i].pos.y);
+      let maxDist = dist(this.pos.x, this.pos.y, list[i].pos.x, list[i].pos.y);
       // delete 
-      if (d < (5 + this.radius)) {
+      if (maxDist < (5 + this.radius)) {
         list.splice(i, 1);
         this.health += nutri;
         this.radius += nutri;
         if (this.radius > this.maxRadius) {
           this.radius = this.maxRadius;
         }
-      }
-      else {
-        if (d < record && d < perception) {
-          record = d;
+      } else {
+        if (maxDist < record && maxDist < perception) {
+          record = maxDist;
           close = list[i];
         }
       }
@@ -302,179 +283,71 @@ class BaseAgent {
    * randomly returns a new Agent
    */
   clone(probability) {
+    // this.pos.x, this.pos.y, 5, this.dna
     if (Math.random() < probability) {
-      // this.pos.x, this.pos.y, 5, this.dna
       return this.builder.setPos(this.pos.x, this.pos.y).setRadius(5).build();
     }
     return null;
   }
 
+  /**
+   * Check if the Agent can reproduce
+   * @param {BaseAgent} agentA 
+   * @returns {Boolean} 
+   */
+  canReproduceWith(agentA) {
+    let isAdult = (agentA.radius + this.radius > 16);
+    let isSameGender = agentA.getGender() === this.getGender();
+    let isHealthy = (agentA.health + this.health > 0.9);
+
+    return (isAdult && !isSameGender && isHealthy)
+  }
+
+  /**
+   * 
+   * @param {Array} boids 
+   * @param {BaseAgent} agentA 
+   */
+  birthNewChild(boids, agentA) {
+    this.hasReproduced++;
+    agentA.hasReproduced++;
+    let x = this.pos.x + random(this.vel.x, agentA.vel.x);
+    let y = this.pos.y + random(this.vel.y, agentA.vel.y);
+    let newchild = this.builder
+      .setPos(x, y)
+      .setRadius(5)
+      .setDNA(this.dna)
+      .build()
+
+    boids.push(newchild);
+    // Only for debug purposes
+    // let childColor = [155, 100, 255];
+    // this.partners[agentA.uid] = agentA;
+    // agentA.partners[this.uid] = this;
+    // newchild.parent = this;
+    // this.childs.push(newchild);
+  }
 
   /**
    * @method reproduce()
-   * @param {Array} list
+   * @param {Array} boids
    * Reproduction System
    * checks male and female agents and starts Reproduction
    * if they are close enough 
    */
   reproduce(boids) {
-    let d = Infinity;
+    let maxDist = Infinity;
+    let agentB = this;
     for (let i = 0; i < boids.length - 1; i++) {
       let agentA = boids[i];
-      d = dist(agentA.pos.x, agentA.pos.y, this.pos.x, this.pos.y);
+      maxDist = dist(agentA.pos.x, agentA.pos.y, this.pos.x, this.pos.y);
 
-      if (d < (this.radius + agentA.radius)) {
-        let isAdult = (agentA.radius > 8 && this.radius > 8);
-        let isNotSameGender = (agentA.getGender() !== this.getGender());
-        let isHealthy = (agentA.health > 0.5 && this.health > 0.5);
-        if (isAdult && isNotSameGender && isHealthy) {
-          this.hasReproduced++;
-          agentA.hasReproduced++;
-          let x = this.pos.x + random(this.vel.x, agentA.vel.x);
-          let y = this.pos.y + random(this.vel.y, agentA.vel.y);
-          // let childColor = [155, 100, 255];
-          // x, y, 5, this.dna, childColor
-          let newchild = this.builder
-          .setPos(x, y)
-          .setRadius(5)
-          .setDNA(this.dna)
-          .build()
-          // .setColor(childColor)
-          
-          // Only for debug purposes
-          // this.partners[agentA.uid] = agentA;
-          // agentA.partners[this.uid] = this;
-          // newchild.parent = this;
-          // this.childs.push(newchild);
-          boids.push(newchild);
+      if (maxDist < (agentB.radius + agentA.radius)) {
+        if (this.canReproduceWith(agentA)) {
+          this.birthNewChild(boids, agentA);
           return;
         }
       }
     }
-  }
-
-  renderHealth(ctx) {
-    ctx.save();
-    ctx.fillStyle = 'white';
-    ctx.fillRect(this.pos.x - 10, this.pos.y - 10, this.health * 20, 3);
-    ctx.lineWidth = 0.3;
-    ctx.strokeStyle = 'white';
-    ctx.strokeRect(this.pos.x - 10, this.pos.y - 10, 1 * 20, 2);
-    ctx.restore();
-  }
-
-  renderDebug(ctx) {
-    ctx.beginPath();
-    ctx.strokeStyle = 'green';
-    ctx.arc(this.pos.x, this.pos.y, clamp(this.dna[2], 0, 100), 0, TWO_PI);
-    ctx.stroke();
-    ctx.closePath();
-    ctx.beginPath();
-    ctx.strokeStyle = 'red';
-    ctx.arc(this.pos.x, this.pos.y, clamp(this.dna[3], 0, 100), 0, TWO_PI);
-    ctx.stroke();
-    ctx.closePath();
-  }
-
-  renderDebugDNA(ctx) {
-    let angle = this.vel.heading() + (Math.PI / 2);
-    ctx.save();
-    ctx.beginPath();
-    ctx.translate(this.pos.x, this.pos.y);
-    ctx.rotate(angle);
-    ctx.strokeStyle = 'green';
-    ctx.moveTo(0, 0);
-    ctx.lineTo(0, -this.dna[0] * 20);
-    ctx.stroke();
-    ctx.closePath();
-    ctx.beginPath();
-    ctx.strokeStyle = 'red';
-    ctx.moveTo(0, 0);
-    ctx.lineTo(0, -this.dna[1] * 20);
-    ctx.stroke();
-    ctx.closePath();
-    ctx.restore();
-  }
-
-  renderNames(ctx) {
-    ctx.beginPath();
-    ctx.fillStyle = 'white';
-    ctx.fillText(this.name, this.pos.x - this.radius, this.pos.y - this.radius - 5);
-    ctx.fill();
-    ctx.closePath();
-  }
-
-  /**
-   * Only For Debugging Purposes
-   * @param {*} ctx 
-   */
-  renderAgentDebug(ctx) {
-    if (!ENABLE_SUPER_DEBUG) return;
-    let x = (this.pos.x - this.radius);
-    let y = (this.pos.y - this.radius) - 30;
-
-    let lineheight = -20;
-    let data = {
-      pos: 'x : ' + (this.pos.x).toFixed(2) + ' y : ' + (this.pos.y).toFixed(2),
-      reproduced: this.hasReproduced,
-      age: (this.age).toFixed(1),
-      gender: this.getGender(),
-      uid: this.uid,
-      type: this.type,
-    }
-    ctx.beginPath();
-    ctx.fillStyle = 'white';
-    for (const i in data) {
-      ctx.fillText(i + ': ' + data[i], x - 30, y - lineheight);
-      lineheight += 12;
-    }
-    ctx.fill();
-    ctx.closePath();
-
-    for (const i in this.partners) {
-      if (this.partners[i] !== undefined) {
-        ctx.beginPath();
-        ctx.strokeStyle = 'white';
-        ctx.moveTo(this.pos.x, this.pos.y);
-        ctx.lineTo(this.partners[i].pos.x, this.partners[i].pos.y);
-        ctx.stroke();
-        ctx.closePath();
-      }
-    }
-
-    for (let j = this.childs.length; j >= 0; j--) {
-      if (this.childs[j]) {
-        ctx.beginPath();
-        ctx.strokeStyle = 'deepskyblue';
-        ctx.moveTo(this.pos.x, this.pos.y);
-        ctx.lineTo(this.childs[j].pos.x, this.childs[j].pos.y);
-        ctx.stroke();
-        ctx.closePath();
-      }
-    }
-  }
-
-  /**
-   * Render Agent
-   * @param {CanvasRenderingContext2D} ctx
-   */
-  render(ctx) {
-    ctx.beginPath();
-
-    ctx.fillStyle = `rgba(${this.color[0]},${this.color[1]},${this.color[2]},${this.health})`;
-    let angle = this.vel.heading();
-
-    ctx.save();
-    ctx.translate(this.pos.x, this.pos.y);
-    ctx.rotate(angle);
-    ctx.moveTo(this.radius, 0);
-    ctx.lineTo(-this.radius, -this.radius + 2);
-    ctx.lineTo(-this.radius, this.radius - 4);
-    ctx.lineTo(this.radius, 0);
-    ctx.fill();
-    ctx.restore();
-
-    ctx.closePath();
-
   }
 }

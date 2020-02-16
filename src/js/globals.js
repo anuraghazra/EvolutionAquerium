@@ -1,7 +1,9 @@
 // * I WILL REFACTOR IT LATER
 // * I WILL REFACTOR IT LATER
 // * I WILL REFACTOR IT LATER
-
+function getRandomArrayItem(arr) {
+  return arr[Math.floor(random(0, arr.length - 1))];
+}
 function addCreatures(list, max) {
   for (let i = 0; i < max; i++) {
     let x = random(WIDTH);
@@ -67,7 +69,7 @@ function addItem(list, max, xx, yy) {
 }
 
 function isInsideWall(x, y, padding) {
-  if (typeof walls === 'undefined') { return false } 
+  if (typeof walls === 'undefined') { return false }
   for (let w = 0; w < walls.length; w++) {
     let wall = walls[w];
     if (

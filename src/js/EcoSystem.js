@@ -53,8 +53,7 @@ class EcoSystem {
    * @param {Nmber} radius 
    * adds creatures to groups object
    */
-  add(type, x, y, radius) {
-    radius = radius || 5;
+  add(type, x, y, radius = 5) {
     let name = this.agents[type]
     this.groups[type].push(name.setPos(x, y).setRadius(radius).build());
   }
@@ -71,7 +70,7 @@ class EcoSystem {
     for (let i = 0; i < max; i++) {
       let x = random(WIDTH);
       let y = random(HEIGHT);
-      let radius = random(4, 5);
+      const radius = random(4, 5);
       if (isInsideWall(x, y, radius)) {
         x = random(WIDTH);
         y = random(HEIGHT);
@@ -96,12 +95,12 @@ class EcoSystem {
    * @param {Function} config.callback
    */
   addBehavior(config) {
-    let agents = this.groups[config.name];
-    let foodPoison = [this.entities[config.like], this.entities[config.dislike]];
-    let likeDislikeWeight = config.likeDislikeWeight;
-    let callback = config.callback;
-    let fear = [];
-    let cloneItSelf = config.cloneItSelf;
+    const agents = this.groups[config.name];
+    const foodPoison = [this.entities[config.like], this.entities[config.dislike]];
+    const likeDislikeWeight = config.likeDislikeWeight;
+    const callback = config.callback;
+    const fear = [];
+    const cloneItSelf = config.cloneItSelf;
 
     if (!agents) return;
     // PARSE FEAR ARRAY
@@ -117,7 +116,7 @@ class EcoSystem {
    */
   update() {
     for (const a in this.behaviors) {
-      let behave = this.behaviors[a];
+      const behave = this.behaviors[a];
       this.batchUpdateAgents(behave.agents, behave.foodPoison, behave.likeDislikeWeight, (list, i) => {
         let current = list[i];
 
@@ -157,14 +156,12 @@ class EcoSystem {
       }
       list[i].boundaries();
 
-      if (callback) {
-        callback.call(list[i], list, i);
-      }
+      callback && callback.call(list[i], list, i);
 
       // Kill the agent
       if (list[i].isDead()) {
-        let x = list[i].pos.x;
-        let y = list[i].pos.y;
+        const x = list[i].pos.x;
+        const y = list[i].pos.y;
         foodPoison && foodPoison[0].push({ pos: new Vector(x, y) });
         list.splice(i, 1);
       }

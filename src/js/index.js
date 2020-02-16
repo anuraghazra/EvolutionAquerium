@@ -4,12 +4,11 @@ let WIDTH = canvas.width = window.innerWidth;
 let HEIGHT = canvas.height = 600;
 let ctx = canvas.getContext('2d');
 
-
 let MAX_CREATURES = 300;
 const REPRODUCTION_RATE = 0.5;
-const ENABLE_SUPER_DEBUG = false;
+const ENABLE_SUPER_DEBUG = true;
 
-// constants for flexibilty
+// constants for flexibility
 const CREATURE = 'CREATURE';
 const PREDATOR = 'PREDATOR';
 const AVOIDER = 'AVOIDER';
@@ -50,10 +49,9 @@ function load() {
   if (ENABLE_SUPER_DEBUG) {
     canvas.addEventListener('mousedown', function (e) {
       for (let i = 0; i < ecoSys.groups.CREATURE.length; i++) {
-        let a = ecoSys.groups.CREATURE[i];
-        if (dist(e.offsetX, e.offsetY, a.pos.x, a.pos.y) < a.radius * 2) {
-          debugAgent = a;
-        }
+        let agent = ecoSys.groups.CREATURE[i];
+        let d = dist(e.offsetX, e.offsetY, agent.pos.x, agent.pos.y);
+        if (d < agent.radius * 2) debugAgent = agent;
       }
     })
   }
@@ -71,18 +69,10 @@ function load() {
     if (random(1) < 0.005) addPredators(ecoSys.groups.PREDATOR, 1);
     if (random(1) < 0.005) addAvoiders(ecoSys.groups.AVOIDER, 1);
 
-    if (ecoSys.groups.CREATURE.length < 20) {
-      addCreatures(ecoSys.groups.CREATURE, 10);
-    }
-    if (ecoSys.groups.EATER.length < 1) {
-      addEaters(ecoSys.groups.EATER, 1);
-    }
-    if (ecoSys.entities.FOOD.length < 50) {
-      addItem(ecoSys.entities.FOOD, 20);
-    }
-    if (ecoSys.groups.CREATURE.length > MAX_CREATURES) {
-      ecoSys.groups.CREATURE.pop()
-    };
+    if (ecoSys.groups.CREATURE.length < 20) addCreatures(ecoSys.groups.CREATURE, 10);
+    if (ecoSys.groups.EATER.length < 1) addEaters(ecoSys.groups.EATER, 1);
+    if (ecoSys.entities.FOOD.length < 50) addItem(ecoSys.entities.FOOD, 20);
+    if (ecoSys.groups.CREATURE.length > MAX_CREATURES) ecoSys.groups.CREATURE.pop()
   }
 
 
@@ -90,14 +80,13 @@ function load() {
   var fps;
   //  ANIMATE LOOP
   function animate() {
-    let grd = ctx.createRadialGradient(WIDTH / 2, HEIGHT / 2, 0, WIDTH / 2, HEIGHT / 2, WIDTH);
+    const HALF_W = WIDTH / 2;
+    const HALF_H = HEIGHT / 2;
+    let grd = ctx.createRadialGradient(HALF_W, HALF_H, 0, HALF_W, HALF_H, WIDTH);
     grd.addColorStop(0, "rgba(25,25,25,1)");
     grd.addColorStop(1, "rgba(0,0,25,1)");
-    // Fill with gradient
     ctx.fillStyle = grd;
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
-    // ctx.fillStyle = '#252525';
-    // ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
     /**
      * likes food dislikes poison
