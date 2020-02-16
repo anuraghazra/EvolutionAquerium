@@ -1,5 +1,7 @@
 # Evolution Aquerium
 
+Check out [Evolution Aquerium case study](https://anuraghazra.github.io/case-studies/evolution-aquerium).
+
 [![](https://img.shields.io/github/license/anuraghazra/EvolutionAquerium.svg)](https://github.com/anuraghazra/EvolutionAquerium/blob/master/LICENSE)
 [![](https://img.shields.io/github/stars/anuraghazra/EvolutionAquerium.svg)](https://github.com/anuraghazra/EvolutionAquerium)
 
